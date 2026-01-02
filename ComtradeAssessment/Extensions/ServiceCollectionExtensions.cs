@@ -1,10 +1,9 @@
-﻿using System.Text;
-using ComtradeAssessment.Context;
+﻿using ComtradeAssessment.Context;
 using ComtradeAssessment.Interfaces;
 using ComtradeAssessment.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+using SoapCore;
 
 namespace ComtradeAssessment.Extensions;
 
@@ -21,56 +20,24 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDatabaseContext>(provider =>
             provider.GetRequiredService<DatabaseContext>()
         );
-        services.AddScoped<IUserService, UserService>();
+        services.AddHttpContextAccessor();
 
-        var jwtSection = config.GetSection("Jwt");
-        services.Configure<JwtSettings>(jwtSection);
-        var jwtSettings = jwtSection.Get<JwtSettings>();
-        var key = Encoding.ASCII.GetBytes(jwtSettings!.Key);
-        services
-            .AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
-            {
-                options.RequireHttpsMetadata = false;
-                options.SaveToken = true;
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidIssuer = jwtSettings.Issuer,
-                    ValidAudience = jwtSettings.Audience,
-                    ClockSkew = TimeSpan.Zero,
-                };
-                options.Events = new JwtBearerEvents
-                {
-                    OnMessageReceived = context =>
-                    {
-                        var accessToken = context
-                            .Request.Headers["Authorization"]
-                            .ToString()
-                            .Replace("Bearer ", "");
-                        var path = context.HttpContext.Request.Path;
-                        if (
-                            !string.IsNullOrEmpty(accessToken)
-                            && (
-                                path.StartsWithSegments("/chatHub")
-                                || path.StartsWithSegments("/negotiate")
-                            )
-                        )
-                        {
-                            context.Token = accessToken;
-                        }
-                        return Task.CompletedTask;
-                    },
-                };
-            });
-        services.AddAuthorization();
+        services.AddHangfire(options =>
+            options
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseSqlServerStorage(config.GetConnectionString("DefaultConnection"))
+        );
+
+        services.AddHangfireServer();
+
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<ICampaignService, CampaignService>();
+        services.AddScoped<ICampaignOfferService, CampaignOfferService>();
+        services.AddScoped<IPurchaseImportService, PurchaseImportService>();
+
+        services.AddSoapCore();
 
         return services;
     }

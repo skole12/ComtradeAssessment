@@ -10,6 +10,10 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options)
 {
     #region DbSets
     public DbSet<User> Users { get; set; }
+    public DbSet<Role> Roles { get; set; }
+    public DbSet<Campaign> Campaigns { get; set; }
+    public DbSet<CampaignOffer> CampaignOffers { get; set; }
+    public DbSet<Purchase> Purchases { get; set; }
 
     #endregion
 

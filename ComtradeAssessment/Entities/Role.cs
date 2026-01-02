@@ -1,11 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace ComtradeAssessment.Entities
+namespace ComtradeAssessment.Entities;
+
+[PrimaryKey(nameof(Id))]
+public class Role
 {
-    [PrimaryKey(nameof(Id))]
-    public class Role
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
-    }
+    public Guid Id { get; set; }
+    public string Name { get; set; }
 }
