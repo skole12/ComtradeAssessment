@@ -6,7 +6,7 @@ namespace ComtradeAssessment.DTO;
 public class PurchaseImportDto
 {
     [DataMember(Order = 1)]
-    public string FileName { get; set; }
+    public int CampaignId { get; set; }
 
     [DataMember(Order = 2)]
     public string FileContentBase64 { get; set; }

@@ -1,5 +1,4 @@
-﻿using System.IdentityModel.Claims;
-using System.ServiceModel;
+﻿using System.ServiceModel;
 using ComtradeAssessment.DTO;
 using ComtradeAssessment.Entities;
 using ComtradeAssessment.Interfaces;
@@ -22,13 +21,21 @@ public class CampaignOfferService : ICampaignOfferService
         CreateCampaignOfferRequest request
     )
     {
+        var currentDate = DateTime.UtcNow.Date;
         var userId = currentUser.UserId;
+
+        var campaign =
+            await databaseContext.Campaigns.FindAsync(request.CampaignId)
+            ?? throw new FaultException("Campaign does not exist!");
+
+        if (currentDate > campaign.EndDate.Date)
+            throw new FaultException("It is forbidden to create offers for campaign that ended!");
 
         var numberOfAgentOffers = await databaseContext
             .CampaignOffers.Where(co =>
                 co.CampaignId == request.CampaignId
                 && co.AgentId == new Guid(userId)
-                && co.CreatedAt.Date == DateTime.UtcNow.Date
+                && co.CreatedAt.Date == currentDate
             )
             .CountAsync();
 

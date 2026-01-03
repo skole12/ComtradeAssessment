@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
 namespace ComtradeAssessment.Entities;
@@ -17,4 +18,7 @@ public class Campaign
 
     [Required]
     public DateTime EndDate { get; set; }
+
+    [DefaultValue(false)]
+    public bool ResultsConcluded { get; set; }
 }

@@ -6,12 +6,13 @@ using Microsoft.EntityFrameworkCore;
 namespace ComtradeAssessment.Entities;
 
 [PrimaryKey(nameof(Id))]
-public class Purchase
+public class CampaignPurchase
 {
     [Required]
     public long Id { get; set; }
 
-    public int? CampaignId { get; set; }
+    [Required]
+    public int CampaignId { get; set; }
 
     [Required]
     public int CustomerId { get; set; }
@@ -30,7 +31,4 @@ public class Purchase
 
     [Required]
     public EPaymentType PaymentType { get; set; }
-
-    [ForeignKey(nameof(CampaignId))]
-    public virtual Campaign Campaign { get; set; }
 }

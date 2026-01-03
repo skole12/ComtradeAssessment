@@ -30,3 +30,26 @@ public class CampaignResponseDto
     [DataMember(Order = 4)]
     public DateTime EndDate { get; set; }
 }
+
+[DataContract(Namespace = "http://tempuri.org/")]
+public class GetCampaignResults
+{
+    [DataMember(Order = 1)]
+    public int CampaignId { get; set; }
+}
+
+[DataContract(Namespace = "http://tempuri.org/")]
+public class CampaignResultsResponseDto
+{
+    [DataMember(Order = 1)]
+    public int CampaignId { get; set; }
+
+    [DataMember(Order = 2)]
+    public int DiscountsOffered { get; set; }
+
+    [DataMember(Order = 3)]
+    public int PurchasesMade { get; set; }
+
+    [DataMember(Order = 4)]
+    public float SuccessRate { get; set; }
+}

@@ -13,7 +13,7 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options)
     public DbSet<Role> Roles { get; set; }
     public DbSet<Campaign> Campaigns { get; set; }
     public DbSet<CampaignOffer> CampaignOffers { get; set; }
-    public DbSet<Purchase> Purchases { get; set; }
+    public DbSet<CampaignPurchase> CampaignPurchases { get; set; }
 
     #endregion
 

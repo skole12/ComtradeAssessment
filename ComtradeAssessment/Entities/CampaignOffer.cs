@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,6 +19,11 @@ public class CampaignOffer
 
     [Required]
     public DateTime CreatedAt { get; set; }
+
+    [DefaultValue(false)]
+    public bool MadePurchase { get; set; }
+
+    public DateTime? PurchaseDate { get; set; }
 
     [StringLength(500)]
     public string? Note { get; set; }

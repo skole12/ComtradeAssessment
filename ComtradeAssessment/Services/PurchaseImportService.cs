@@ -12,7 +12,7 @@ public class PurchaseImportService : IPurchaseImportService
         try
         {
             BackgroundJob.Enqueue<PurchaseImportWorker>(worker =>
-                worker.ProcessCsv(request.FileName, request.FileContentBase64)
+                worker.ProcessCsv(request.CampaignId, request.FileContentBase64)
             );
             return new PurchaseImportResponse
             {

@@ -6,6 +6,9 @@ namespace ComtradeAssessment.Interfaces;
 [ServiceContract(Namespace = "http://tempuri.org/")]
 public interface ICampaignService
 {
-    [OperationContract(Name = "CreateCampaign")]
+    [OperationContract]
     Task<CampaignResponseDto> CreateCampaign(CreateCampaignRequest request);
+
+    [OperationContract]
+    Task<CampaignResultsResponseDto> CampaignResults(GetCampaignResults request);
 }
