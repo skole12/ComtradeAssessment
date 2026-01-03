@@ -4,6 +4,7 @@ using ComtradeAssessment.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ComtradeAssessment.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20260102233358_nullableNoteColumn")]
+    partial class nullableNoteColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,25 +51,33 @@ namespace ComtradeAssessment.Migrations
 
             modelBuilder.Entity("ComtradeAssessment.Entities.CampaignOffer", b =>
                 {
-                    b.Property<int>("CampaignId")
-                        .HasColumnType("int");
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
 
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<Guid>("AgentId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("CampaignId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Note")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.HasKey("CampaignId", "CustomerId");
+                    b.HasKey("Id");
 
                     b.HasIndex("AgentId");
+
+                    b.HasIndex("CampaignId");
 
                     b.ToTable("CampaignOffers");
                 });
@@ -85,8 +96,8 @@ namespace ComtradeAssessment.Migrations
                     b.Property<int>("AmountAfterDiscount")
                         .HasColumnType("int");
 
-                    b.Property<int?>("CampaignId")
-                        .HasColumnType("int");
+                    b.Property<long>("CampaignOfferId")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("CustomerId")
                         .HasColumnType("int");
@@ -101,8 +112,6 @@ namespace ComtradeAssessment.Migrations
                         .HasColumnType("tinyint");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CampaignId");
 
                     b.ToTable("Purchases");
                 });
@@ -171,15 +180,6 @@ namespace ComtradeAssessment.Migrations
                         .IsRequired();
 
                     b.Navigation("Agent");
-
-                    b.Navigation("Campaign");
-                });
-
-            modelBuilder.Entity("ComtradeAssessment.Entities.Purchase", b =>
-                {
-                    b.HasOne("ComtradeAssessment.Entities.Campaign", "Campaign")
-                        .WithMany()
-                        .HasForeignKey("CampaignId");
 
                     b.Navigation("Campaign");
                 });

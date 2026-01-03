@@ -1,31 +1,41 @@
 ﻿using System.IdentityModel.Claims;
+using System.ServiceModel;
 using ComtradeAssessment.DTO;
 using ComtradeAssessment.Entities;
 using ComtradeAssessment.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace ComtradeAssessment.Services;
 
 public class CampaignOfferService : ICampaignOfferService
 {
     private readonly IDatabaseContext databaseContext;
-    private readonly IHttpContextAccessor httpContextAccessor;
+    private readonly ICurrentUser currentUser;
 
-    public CampaignOfferService(
-        IDatabaseContext databaseContext,
-        IHttpContextAccessor httpContextAccessor
-    )
+    public CampaignOfferService(IDatabaseContext databaseContext, ICurrentUser currentUser)
     {
         this.databaseContext = databaseContext;
-        this.httpContextAccessor = httpContextAccessor;
+        this.currentUser = currentUser;
     }
 
     public async Task<CampaignOfferResponseDto> CreateCampaignOffer(
         CreateCampaignOfferRequest request
     )
     {
-        var userId =
-            httpContextAccessor.HttpContext?.Items["UserId"]?.ToString()
-            ?? throw new UnauthorizedAccessException();
+        var userId = currentUser.UserId;
+
+        var numberOfAgentOffers = await databaseContext
+            .CampaignOffers.Where(co =>
+                co.CampaignId == request.CampaignId
+                && co.AgentId == new Guid(userId)
+                && co.CreatedAt.Date == DateTime.UtcNow.Date
+            )
+            .CountAsync();
+
+        if (numberOfAgentOffers >= 5)
+        {
+            throw new FaultException("It is forbidden to create more than 5 discounts per day!");
+        }
 
         var campaignOffer = new CampaignOffer
         {
@@ -40,7 +50,6 @@ public class CampaignOfferService : ICampaignOfferService
 
         return new CampaignOfferResponseDto
         {
-            Id = campaignOffer.Id,
             CampaignId = campaignOffer.CampaignId,
             AgentId = campaignOffer.AgentId,
             CustomerId = campaignOffer.CustomerId,

@@ -15,9 +15,6 @@ public class CreateCampaignOfferRequest
 [DataContract(Namespace = "http://tempuri.org/")]
 public class CampaignOfferResponseDto
 {
-    [DataMember(Order = 1)]
-    public long Id { get; set; }
-
     [DataMember(Order = 2)]
     public int CampaignId { get; set; }
 

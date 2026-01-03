@@ -16,7 +16,7 @@ app.UseRouting();
 app.UseHttpsRedirection();
 app.UseHangfireDashboard("/hangfire");
 
-//app.UseMiddleware<AuthMiddleware>();
+app.UseMiddleware<AuthMiddleware>();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapSoapEndpoints();

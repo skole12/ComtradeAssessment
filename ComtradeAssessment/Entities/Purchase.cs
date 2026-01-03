@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using ComtradeAssessment.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,8 +11,7 @@ public class Purchase
     [Required]
     public long Id { get; set; }
 
-    [Required]
-    public long? CampaignOfferId { get; set; }
+    public int? CampaignId { get; set; }
 
     [Required]
     public int CustomerId { get; set; }
@@ -28,5 +28,9 @@ public class Purchase
     [Required]
     public int AmountAfterDiscount { get; set; }
 
+    [Required]
     public EPaymentType PaymentType { get; set; }
+
+    [ForeignKey(nameof(CampaignId))]
+    public virtual Campaign Campaign { get; set; }
 }

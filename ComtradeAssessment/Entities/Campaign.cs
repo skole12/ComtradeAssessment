@@ -9,7 +9,12 @@ public class Campaign
     public int Id { get; set; }
 
     [StringLength(200)]
+    [Required]
     public string Name { get; set; }
+
+    [Required]
     public DateTime StartDate { get; set; }
+
+    [Required]
     public DateTime EndDate { get; set; }
 }

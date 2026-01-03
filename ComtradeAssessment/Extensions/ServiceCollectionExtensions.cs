@@ -21,6 +21,7 @@ public static class ServiceCollectionExtensions
             provider.GetRequiredService<DatabaseContext>()
         );
         services.AddHttpContextAccessor();
+        services.Configure<JwtSettings>(config.GetSection("JwtSettings"));
 
         services.AddHangfire(options =>
             options
@@ -32,6 +33,7 @@ public static class ServiceCollectionExtensions
 
         services.AddHangfireServer();
 
+        services.AddScoped<ICurrentUser, CurrentUser>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ICampaignService, CampaignService>();
         services.AddScoped<ICampaignOfferService, CampaignOfferService>();

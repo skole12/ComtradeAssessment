@@ -41,9 +41,7 @@ public class PurchaseImportWorker
 
             var purchase = new Purchase
             {
-                CampaignOfferId = string.IsNullOrWhiteSpace(columns[0])
-                    ? null
-                    : long.Parse(columns[0].Trim()),
+                CampaignId = int.Parse(columns[0].Trim()),
                 CustomerId = int.Parse(columns[1].Trim()),
                 Date = DateTime.Parse(columns[2].Trim()),
                 Amount = int.Parse(columns[3].Trim()),
