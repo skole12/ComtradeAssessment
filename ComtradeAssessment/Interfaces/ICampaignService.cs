@@ -17,4 +17,7 @@ public interface ICampaignService
 
     [OperationContract]
     Task<CampaignDetailsResponseDto> CampaignDetails(int campaignId);
+
+    [OperationContract]
+    Task<GetAllCampaignsResponse> GetAll(BaseRequest request);
 }

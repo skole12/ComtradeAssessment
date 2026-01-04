@@ -9,7 +9,6 @@ public interface IDatabaseContext
     DbSet<Role> Roles { get; }
     DbSet<Campaign> Campaigns { get; }
     DbSet<CampaignOffer> CampaignOffers { get; set; }
-    DbSet<CampaignPurchase> CampaignPurchases { get; set; }
 
     DbSet<TEntity> Set<TEntity>()
         where TEntity : class;

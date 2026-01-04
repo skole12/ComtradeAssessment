@@ -1,9 +1,11 @@
-﻿using System.ServiceModel;
+﻿using System.Linq.Expressions;
+using System.ServiceModel;
 using ComtradeAssessment.Attributes;
 using ComtradeAssessment.Constants;
 using ComtradeAssessment.DTO;
 using ComtradeAssessment.Entities;
 using ComtradeAssessment.Interfaces;
+using ComtradeAssessment.Specifications;
 using Microsoft.EntityFrameworkCore;
 
 namespace ComtradeAssessment.Services;
@@ -111,6 +113,71 @@ public class CampaignService : ICampaignService
             Name = campaign.Name,
             StartDate = campaign.StartDate,
             EndDate = campaign.EndDate,
+            ResultsConcluded = campaign.ResultsConcluded,
         };
+    }
+
+    public async Task<GetAllCampaignsResponse> GetAll(BaseRequest request)
+    {
+        var spec = CreateListSpecification(request);
+        var countSpec = CreateCountSpecification(request);
+
+        var query = SpecificationEvaluator<Campaign>.GetQuery(
+            databaseContext.Set<Campaign>(),
+            spec
+        );
+        var countQuery = SpecificationEvaluator<Campaign>.GetCountQuery(
+            databaseContext.Set<Campaign>(),
+            countSpec
+        );
+
+        int totalCount = await countQuery.CountAsync();
+        var items = await query.ToListAsync();
+
+        return new GetAllCampaignsResponse
+        {
+            Items = items
+                .Select(c => new CampaignResponseDto
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    StartDate = c.StartDate,
+                    EndDate = c.EndDate,
+                    ResultsConcluded = c.ResultsConcluded,
+                })
+                .ToList(),
+            Pagination = new PaginationResponse
+            {
+                PageNumber = request.Pagination.PageNumber,
+                PageSize = request.Pagination.PageSize,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)request.Pagination.PageSize),
+            },
+        };
+    }
+
+    protected virtual HashSet<string> AllowedIncludes { get; } = [];
+
+    /// <summary>
+    /// Creates a specification for retrieving a filtered and paginated list of entities based on the provided request.
+    /// </summary>
+    /// <param name="request">The filtering and pagination criteria.</param>
+    /// <returns>Returns a specification used to query entities according to the provided request parameters.</returns>
+    protected virtual ISpecification<Campaign> CreateListSpecification(BaseRequest request)
+    {
+        return new BaseSpecification<Campaign>(request, AllowedIncludes);
+    }
+
+    /// <summary>
+    /// Creates a specification for counting the total number of entities that match the provided search criteria.
+    /// </summary>
+    /// <param name="request">The request containing search parameters.</param>
+    /// <returns>Returns a specification used to count entities matching the given filters.</returns>
+    protected virtual ISpecification<Campaign> CreateCountSpecification(BaseRequest request)
+    {
+        var spec = new BaseSpecification<Campaign>(null);
+        spec.ApplyFilters(request.Filters);
+
+        return spec;
     }
 }

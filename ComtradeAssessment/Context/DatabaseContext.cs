@@ -13,17 +13,10 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options)
     public DbSet<Role> Roles { get; set; }
     public DbSet<Campaign> Campaigns { get; set; }
     public DbSet<CampaignOffer> CampaignOffers { get; set; }
-    public DbSet<CampaignPurchase> CampaignPurchases { get; set; }
 
     #endregion
 
 
     public new DbSet<TEntity> Set<TEntity>()
         where TEntity : class => base.Set<TEntity>();
-
-    //protected override void OnModelCreating(ModelBuilder modelBuilder)
-    //{
-    //    modelBuilder.HasDefaultSchema("TestZadatak");
-    //    base.OnModelCreating(modelBuilder);
-    //}
 }

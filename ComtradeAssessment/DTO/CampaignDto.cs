@@ -29,6 +29,9 @@ public class CampaignResponseDto
 
     [DataMember(Order = 4)]
     public DateTime EndDate { get; set; }
+
+    [DataMember(Order = 5)]
+    public bool ResultsConcluded { get; set; }
 }
 
 [DataContract(Namespace = "http://tempuri.org/")]
@@ -73,4 +76,14 @@ public class UpdateCampaignRequest
 
     [DataMember(Order = 4)]
     public DateTime EndDate { get; set; }
+}
+
+[DataContract]
+public class GetAllCampaignsResponse
+{
+    [DataMember(Order = 1)]
+    public List<CampaignResponseDto> Items { get; set; }
+
+    [DataMember(Order = 2)]
+    public PaginationResponse Pagination { get; set; }
 }
