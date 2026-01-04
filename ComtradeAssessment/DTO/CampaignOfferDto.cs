@@ -27,3 +27,13 @@ public class CampaignOfferResponseDto
     [DataMember(Order = 5)]
     public DateTime CreatedAt { get; set; }
 }
+
+[DataContract(Namespace = "http://tempuri.org/")]
+public class DeleteCampaignOfferRequest
+{
+    [DataMember(Order = 1)]
+    public int CampaignId { get; set; }
+
+    [DataMember(Order = 2)]
+    public int CustomerId { get; set; }
+}

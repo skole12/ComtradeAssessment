@@ -8,4 +8,7 @@ public interface ICampaignOfferService
 {
     [OperationContract]
     Task<CampaignOfferResponseDto> CreateCampaignOffer(CreateCampaignOfferRequest request);
+
+    [OperationContract]
+    Task DeleteCampaignOffer(DeleteCampaignOfferRequest request);
 }

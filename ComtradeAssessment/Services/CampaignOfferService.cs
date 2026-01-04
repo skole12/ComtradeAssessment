@@ -66,4 +66,24 @@ public class CampaignOfferService : ICampaignOfferService
             CreatedAt = campaignOffer.CreatedAt,
         };
     }
+
+    [AuthorizeByRole(ERole.SalesAgent)]
+    public async Task DeleteCampaignOffer(DeleteCampaignOfferRequest request)
+    {
+        var campaign = await databaseContext.Campaigns.FindAsync(request.CampaignId);
+
+        if (campaign != null && campaign.ResultsConcluded)
+            throw new FaultException(
+                "Cannot delete campaign offer from campaign that have concluded results"
+            );
+
+        var deletedRows = await databaseContext
+            .CampaignOffers.Where(c =>
+                c.CampaignId == request.CampaignId && c.CustomerId == request.CustomerId
+            )
+            .ExecuteDeleteAsync();
+
+        if (deletedRows == 0)
+            throw new FaultException("Campaign offer not found");
+    }
 }
