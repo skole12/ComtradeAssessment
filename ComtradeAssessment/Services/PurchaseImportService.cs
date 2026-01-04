@@ -1,4 +1,7 @@
-﻿using ComtradeAssessment.DTO;
+﻿using System.ServiceModel;
+using ComtradeAssessment.Attributes;
+using ComtradeAssessment.Constants;
+using ComtradeAssessment.DTO;
 using ComtradeAssessment.Interfaces;
 using ComtradeAssessment.Workers;
 using Hangfire;
@@ -7,10 +10,25 @@ namespace ComtradeAssessment.Services;
 
 public class PurchaseImportService : IPurchaseImportService
 {
-    public PurchaseImportResponse ImportPurchases(PurchaseImportDto request)
+    private readonly IDatabaseContext databaseContext;
+
+    public PurchaseImportService(IDatabaseContext databaseContext)
+    {
+        this.databaseContext = databaseContext;
+    }
+
+    [AuthorizeByRole(ERole.SalesManager)]
+    public async Task<PurchaseImportResponse> ImportPurchases(PurchaseImportDto request)
     {
         try
         {
+            var campaign =
+                await databaseContext.Campaigns.FindAsync(request.CampaignId)
+                ?? throw new FaultException("Specified campaign does not exist");
+
+            if (campaign.ResultsConcluded)
+                throw new FaultException("Results for this campaign are already imported.");
+
             BackgroundJob.Enqueue<PurchaseImportWorker>(worker =>
                 worker.ProcessCsv(request.CampaignId, request.FileContentBase64)
             );
@@ -22,11 +40,7 @@ public class PurchaseImportService : IPurchaseImportService
         }
         catch (Exception ex)
         {
-            return new PurchaseImportResponse
-            {
-                Success = false,
-                Message = "Error creating background job: " + ex.Message,
-            };
+            return new PurchaseImportResponse { Success = false, Message = ex.Message };
         }
     }
 }

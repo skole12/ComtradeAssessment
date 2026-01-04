@@ -1,4 +1,6 @@
 ﻿using System.ServiceModel;
+using ComtradeAssessment.Attributes;
+using ComtradeAssessment.Constants;
 using ComtradeAssessment.DTO;
 using ComtradeAssessment.Entities;
 using ComtradeAssessment.Interfaces;
@@ -17,6 +19,7 @@ public class CampaignOfferService : ICampaignOfferService
         this.currentUser = currentUser;
     }
 
+    [AuthorizeByRole(ERole.SalesAgent)]
     public async Task<CampaignOfferResponseDto> CreateCampaignOffer(
         CreateCampaignOfferRequest request
     )

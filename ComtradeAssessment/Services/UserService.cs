@@ -1,6 +1,9 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.ServiceModel;
 using System.Text;
+using ComtradeAssessment.Attributes;
+using ComtradeAssessment.Constants;
 using ComtradeAssessment.DTO;
 using ComtradeAssessment.Entities;
 using ComtradeAssessment.Extensions;
@@ -22,14 +25,7 @@ public class UserService : IUserService
         jwtSettings = jwtOptions.Value;
     }
 
-    public async Task<List<UserDto>> GetAllAsync()
-    {
-        return await databaseContext
-            .Set<User>()
-            .Select(u => new UserDto { Id = u.Id, Email = u.Email })
-            .ToListAsync();
-    }
-
+    [AllowAnonymous]
     public async Task<string> Login(LoginDto request)
     {
         var user = await databaseContext
@@ -66,6 +62,7 @@ public class UserService : IUserService
         return tokenString;
     }
 
+    [AuthorizeByRole(ERole.SuperAdmin)]
     public async Task<UserDto> RegisterUser(RegisterDto request)
     {
         bool existingUser = await databaseContext
@@ -73,7 +70,7 @@ public class UserService : IUserService
             .AnyAsync();
         if (existingUser)
         {
-            throw new Exception("User already exists");
+            throw new FaultException("User already exists");
         }
 
         var user = new User

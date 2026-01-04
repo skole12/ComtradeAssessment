@@ -1,7 +1,8 @@
 ﻿using System.Globalization;
-using System.Text.RegularExpressions;
 using ComtradeAssessment.Context;
+using ComtradeAssessment.DTO;
 using EFCore.BulkExtensions;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 
 namespace ComtradeAssessment.Workers;
@@ -10,6 +11,7 @@ public class PurchaseImportWorker(IServiceScopeFactory serviceScopeFactory)
 {
     private readonly IServiceScopeFactory serviceScopeFactory = serviceScopeFactory;
 
+    [AutomaticRetry(Attempts = 0)]
     public async Task ProcessCsv(int campaignId, string base64Content)
     {
         using var scope = serviceScopeFactory.CreateScope();
@@ -40,7 +42,7 @@ public class PurchaseImportWorker(IServiceScopeFactory serviceScopeFactory)
                     continue;
 
                 if (!int.TryParse(columns[0].Trim(), out var customerId))
-                    throw new Exception($"Invalid customerId: {columns[0]}");
+                    throw new Exception($"Invalid customerId Row {rowNumber}: {columns[0]}");
 
                 if (!seen.Add(customerId))
                 {
@@ -57,7 +59,7 @@ public class PurchaseImportWorker(IServiceScopeFactory serviceScopeFactory)
                     )
                 )
                 {
-                    invalidDates.Add($"Red {rowNumber}: '{columns[1]}'");
+                    invalidDates.Add($"Row {rowNumber}: '{columns[1]}'");
                 }
             }
         }
@@ -78,7 +80,7 @@ public class PurchaseImportWorker(IServiceScopeFactory serviceScopeFactory)
         using var readerProcessing = new StreamReader(processingStream);
 
         var batchSize = 3000;
-        var batch = new List<(int CustomerId, DateTime PurchaseDate)>(batchSize);
+        var batch = new List<(int CustomerId, DateTime PurchaseDate, string? Note)>(batchSize);
 
         // skip header
         readerProcessing.ReadLine();
@@ -96,7 +98,8 @@ public class PurchaseImportWorker(IServiceScopeFactory serviceScopeFactory)
             batch.Add(
                 (
                     CustomerId: int.Parse(columns[0].Trim()),
-                    PurchaseDate: DateTime.Parse(columns[1].Trim())
+                    PurchaseDate: DateTime.Parse(columns[1].Trim()),
+                    Note: string.IsNullOrWhiteSpace(columns[2]) ? null : columns[2].Trim()
                 )
             );
 
@@ -120,7 +123,7 @@ public class PurchaseImportWorker(IServiceScopeFactory serviceScopeFactory)
     private async Task UpdateCampaignOffersBatch(
         DatabaseContext context,
         int campaignId,
-        List<(int CustomerId, DateTime PurchaseDate)> batch
+        List<(int CustomerId, DateTime PurchaseDate, string? Note)> batch
     )
     {
         var customerIds = batch.Select(x => x.CustomerId).ToList();
@@ -131,12 +134,17 @@ public class PurchaseImportWorker(IServiceScopeFactory serviceScopeFactory)
             )
             .ToListAsync();
 
-        var lookup = batch.ToDictionary(x => x.CustomerId, x => x.PurchaseDate);
+        var lookup = batch.ToDictionary(
+            x => x.CustomerId,
+            x => new PurchaseCsvInfo { PurchaseDate = x.PurchaseDate, Note = x.Note }
+        );
 
         foreach (var offer in offers)
         {
             offer.MadePurchase = true;
-            offer.PurchaseDate = lookup[offer.CustomerId];
+            var info = lookup[offer.CustomerId];
+            offer.PurchaseDate = info.PurchaseDate;
+            offer.Note = info.Note;
         }
 
         await context.BulkUpdateAsync(

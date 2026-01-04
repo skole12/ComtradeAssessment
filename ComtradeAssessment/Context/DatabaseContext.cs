@@ -17,6 +17,13 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options)
 
     #endregion
 
+
     public new DbSet<TEntity> Set<TEntity>()
         where TEntity : class => base.Set<TEntity>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.HasDefaultSchema("TestZadatak");
+        base.OnModelCreating(modelBuilder);
+    }
 }

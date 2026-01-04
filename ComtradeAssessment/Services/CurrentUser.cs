@@ -1,4 +1,5 @@
-﻿using ComtradeAssessment.Interfaces;
+﻿using System.ServiceModel;
+using ComtradeAssessment.Interfaces;
 
 namespace ComtradeAssessment.Services;
 
@@ -18,7 +19,7 @@ public class CurrentUser : ICurrentUser
             var userId = httpContextAccessor.HttpContext?.Items["UserId"]?.ToString();
 
             if (string.IsNullOrWhiteSpace(userId))
-                throw new UnauthorizedAccessException("UserId not found in context");
+                throw new FaultException("UserId not found in context");
 
             return userId;
         }

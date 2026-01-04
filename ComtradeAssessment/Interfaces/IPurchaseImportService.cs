@@ -1,5 +1,4 @@
 ﻿using System.ServiceModel;
-using ComtradeAssessment.Attributes;
 using ComtradeAssessment.DTO;
 
 namespace ComtradeAssessment.Interfaces;
@@ -8,6 +7,5 @@ namespace ComtradeAssessment.Interfaces;
 public interface IPurchaseImportService
 {
     [OperationContract]
-    [AllowAnonymous]
-    PurchaseImportResponse ImportPurchases(PurchaseImportDto request);
+    Task<PurchaseImportResponse> ImportPurchases(PurchaseImportDto request);
 }

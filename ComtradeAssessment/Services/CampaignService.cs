@@ -1,4 +1,5 @@
-﻿using ComtradeAssessment.Attributes;
+﻿using System.ServiceModel;
+using ComtradeAssessment.Attributes;
 using ComtradeAssessment.Constants;
 using ComtradeAssessment.DTO;
 using ComtradeAssessment.Entities;
@@ -21,12 +22,7 @@ public class CampaignService : ICampaignService
     {
         if (request.EndDate <= request.StartDate)
         {
-            throw new ArgumentException("EndDate must be greater than StartDate");
-        }
-
-        if (request == null)
-        {
-            throw new ArgumentNullException(nameof(request));
+            throw new FaultException("EndDate must be greater than StartDate");
         }
 
         var campaign = new Campaign
@@ -48,6 +44,7 @@ public class CampaignService : ICampaignService
         };
     }
 
+    [AuthorizeByRole(ERole.SalesManager)]
     public async Task<CampaignResultsResponseDto> CampaignResults(GetCampaignResults request)
     {
         var results = await databaseContext
@@ -58,13 +55,7 @@ public class CampaignService : ICampaignService
 
         if (results == null)
         {
-            return new CampaignResultsResponseDto
-            {
-                CampaignId = request.CampaignId,
-                DiscountsOffered = 0,
-                PurchasesMade = 0,
-                SuccessRate = 0,
-            };
+            throw new FaultException("There are no results for given campaign");
         }
 
         return new CampaignResultsResponseDto
