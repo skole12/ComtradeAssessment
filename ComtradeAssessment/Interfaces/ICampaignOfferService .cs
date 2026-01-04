@@ -7,8 +7,11 @@ namespace ComtradeAssessment.Interfaces;
 public interface ICampaignOfferService
 {
     [OperationContract]
-    Task<CampaignOfferResponseDto> CreateCampaignOffer(CreateCampaignOfferRequest request);
+    Task<CampaignOfferResponseDto> Create(CreateCampaignOfferRequest request);
 
     [OperationContract]
-    Task DeleteCampaignOffer(DeleteCampaignOfferRequest request);
+    Task Delete(DeleteCampaignOfferRequest request);
+
+    [OperationContract]
+    Task<PagedResult<CampaignOfferResponseDto>> GetAll(BaseRequest request);
 }

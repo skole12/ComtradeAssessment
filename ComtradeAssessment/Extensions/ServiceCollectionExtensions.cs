@@ -1,5 +1,6 @@
 ﻿using ComtradeAssessment.Context;
 using ComtradeAssessment.Interfaces;
+using ComtradeAssessment.Mappers;
 using ComtradeAssessment.Services;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
@@ -39,7 +40,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICampaignService, CampaignService>();
         services.AddScoped<ICampaignOfferService, CampaignOfferService>();
         services.AddScoped<IPurchaseImportService, PurchaseImportService>();
-
+        services.AddAutoMapper(cfg =>
+        {
+            cfg.AddProfile<Mapper>();
+        });
         services.AddSoapCore();
 
         return services;

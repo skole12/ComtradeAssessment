@@ -7,17 +7,17 @@ namespace ComtradeAssessment.Interfaces;
 public interface ICampaignService
 {
     [OperationContract]
-    Task<CampaignResponseDto> CreateCampaign(CreateCampaignRequest request);
+    Task<CampaignResponseDto> Create(CreateCampaignRequest request);
 
     [OperationContract]
-    Task<CampaignResponseDto> UpdateCampaign(UpdateCampaignRequest request);
+    Task<CampaignResponseDto> Update(UpdateCampaignRequest request);
 
     [OperationContract]
-    Task DeleteCampaign(int campaignId);
+    Task Delete(int campaignId);
 
     [OperationContract]
-    Task<CampaignDetailsResponseDto> CampaignDetails(int campaignId);
+    Task<CampaignDetailsResponseDto> Details(int campaignId);
 
     [OperationContract]
-    Task<GetAllCampaignsResponse> GetAll(BaseRequest request);
+    Task<PagedResult<CampaignResponseDto>> GetAll(BaseRequest request);
 }

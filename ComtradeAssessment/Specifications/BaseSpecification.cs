@@ -71,10 +71,11 @@ public class BaseSpecification<T>(HashSet<string>? allowedIncludes) : ISpecifica
 
     public void ApplyFilters(IEnumerable<Filter> filters)
     {
-        foreach (var filter in filters)
-        {
-            AddCriteria(FilterExpressionBuilder<T>.Build(filter));
-        }
+        if (filters != null)
+            foreach (var filter in filters)
+            {
+                AddCriteria(FilterExpressionBuilder<T>.Build(filter));
+            }
     }
 
     /// <summary>

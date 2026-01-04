@@ -20,7 +20,7 @@ public class CampaignService : ICampaignService
     }
 
     [AuthorizeByRole(ERole.SalesManager)]
-    public async Task<CampaignResponseDto> CreateCampaign(CreateCampaignRequest request)
+    public async Task<CampaignResponseDto> Create(CreateCampaignRequest request)
     {
         if (request.EndDate <= request.StartDate)
         {
@@ -47,7 +47,7 @@ public class CampaignService : ICampaignService
     }
 
     [AuthorizeByRole(ERole.SalesManager)]
-    public async Task<CampaignDetailsResponseDto> CampaignDetails(int campaignId)
+    public async Task<CampaignDetailsResponseDto> Details(int campaignId)
     {
         var result = await databaseContext
             .Campaigns.Where(c => c.Id == campaignId)
@@ -69,14 +69,11 @@ public class CampaignService : ICampaignService
             })
             .FirstOrDefaultAsync();
 
-        if (result == null)
-            throw new FaultException("Campaign not found");
-
-        return result;
+        return result ?? throw new FaultException("Campaign not found");
     }
 
     [AuthorizeByRole(ERole.SalesManager)]
-    public async Task DeleteCampaign(int campaignId)
+    public async Task Delete(int campaignId)
     {
         var deletedRows = await databaseContext
             .Campaigns.Where(c => c.Id == campaignId)
@@ -87,7 +84,7 @@ public class CampaignService : ICampaignService
     }
 
     [AuthorizeByRole(ERole.SalesManager)]
-    public async Task<CampaignResponseDto> UpdateCampaign(UpdateCampaignRequest request)
+    public async Task<CampaignResponseDto> Update(UpdateCampaignRequest request)
     {
         var campaign = await databaseContext.Campaigns.FindAsync(request.Id);
         if (campaign == null)
@@ -117,7 +114,7 @@ public class CampaignService : ICampaignService
         };
     }
 
-    public async Task<GetAllCampaignsResponse> GetAll(BaseRequest request)
+    public async Task<PagedResult<CampaignResponseDto>> GetAll(BaseRequest request)
     {
         var spec = CreateListSpecification(request);
         var countSpec = CreateCountSpecification(request);
@@ -134,18 +131,19 @@ public class CampaignService : ICampaignService
         int totalCount = await countQuery.CountAsync();
         var items = await query.ToListAsync();
 
-        return new GetAllCampaignsResponse
+        return new PagedResult<CampaignResponseDto>
         {
-            Items = items
-                .Select(c => new CampaignResponseDto
+            Items =
+            [
+                .. items.Select(c => new CampaignResponseDto
                 {
                     Id = c.Id,
                     Name = c.Name,
                     StartDate = c.StartDate,
                     EndDate = c.EndDate,
                     ResultsConcluded = c.ResultsConcluded,
-                })
-                .ToList(),
+                }),
+            ],
             Pagination = new PaginationResponse
             {
                 PageNumber = request.Pagination.PageNumber,
