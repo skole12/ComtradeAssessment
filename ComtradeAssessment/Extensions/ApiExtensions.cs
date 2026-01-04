@@ -10,9 +10,7 @@ public static class ApiExtensions
         endpoints.UseSoapEndpoint<IUserService>(
             "/User.svc",
             new SoapEncoderOptions(),
-            SoapSerializer.DataContractSerializer,
-            caseInsensitivePath: true,
-            onException: ErrorHandlers.GlobalErrorHandler
+            SoapSerializer.DataContractSerializer
         );
 
         endpoints.UseSoapEndpoint<ICampaignService>(

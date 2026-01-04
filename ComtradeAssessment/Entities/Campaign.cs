@@ -21,4 +21,9 @@ public class Campaign
 
     [DefaultValue(false)]
     public bool ResultsConcluded { get; set; }
+
+    [StringLength(200)]
+    public string? CsvResultsPath { get; set; }
+
+    public ICollection<CampaignOffer> CampaignOffers { get; set; }
 }

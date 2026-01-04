@@ -29,6 +29,7 @@ public class CampaignOffer
     public string? Note { get; set; }
 
     [ForeignKey(nameof(CampaignId))]
+    [DeleteBehavior(DeleteBehavior.Restrict)]
     public virtual Campaign Campaign { get; set; }
 
     [ForeignKey(nameof(AgentId))]

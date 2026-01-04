@@ -1,15 +1,22 @@
 ﻿using System.Globalization;
+using System.ServiceModel;
 using ComtradeAssessment.Context;
 using ComtradeAssessment.DTO;
+using ComtradeAssessment.Extensions;
 using EFCore.BulkExtensions;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace ComtradeAssessment.Workers;
 
-public class PurchaseImportWorker(IServiceScopeFactory serviceScopeFactory)
+public class PurchaseImportWorker(
+    IServiceScopeFactory serviceScopeFactory,
+    IOptions<FileStorageSettings> fileStorage
+)
 {
     private readonly IServiceScopeFactory serviceScopeFactory = serviceScopeFactory;
+    private readonly IOptions<FileStorageSettings> fileStorage = fileStorage;
 
     [AutomaticRetry(Attempts = 0)]
     public async Task ProcessCsv(int campaignId, string base64Content)
@@ -63,17 +70,17 @@ public class PurchaseImportWorker(IServiceScopeFactory serviceScopeFactory)
                 }
             }
         }
-        if (duplicates.Any() || invalidDates.Any())
+        if (duplicates.Count != 0 || invalidDates.Count != 0)
         {
             var errors = new List<string>();
 
-            if (duplicates.Any())
+            if (duplicates.Count != 0)
                 errors.Add($"Double customerIds: {string.Join(", ", duplicates)}");
 
-            if (invalidDates.Any())
+            if (invalidDates.Count != 0)
                 errors.Add($"Invalid dates: {string.Join("; ", invalidDates)}");
 
-            throw new Exception(string.Join(" | ", errors));
+            throw new FaultException(string.Join(" | ", errors));
         }
 
         using var processingStream = new MemoryStream(fileBytes);
@@ -110,14 +117,20 @@ public class PurchaseImportWorker(IServiceScopeFactory serviceScopeFactory)
             }
         }
 
-        if (batch.Any())
-        {
+        if (batch.Count != 0)
             await UpdateCampaignOffersBatch(context, campaignId, batch);
-        }
+
+        string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+        string fileName = $"campaignResults_{campaignId}_{timestamp}.csv";
+        string filePath = Path.Combine(fileStorage.Value.RootDirectory, fileName);
+        await File.WriteAllBytesAsync(filePath, fileBytes);
 
         await context
             .Campaigns.Where(c => c.Id == campaignId)
-            .ExecuteUpdateAsync(c => c.SetProperty(c => c.ResultsConcluded, true));
+            .ExecuteUpdateAsync(c =>
+                c.SetProperty(c => c.ResultsConcluded, true)
+                    .SetProperty(c => c.CsvResultsPath, filePath)
+            );
     }
 
     private async Task UpdateCampaignOffersBatch(

@@ -31,7 +31,7 @@ public class CampaignOfferService : ICampaignOfferService
             await databaseContext.Campaigns.FindAsync(request.CampaignId)
             ?? throw new FaultException("Campaign does not exist!");
 
-        if (currentDate > campaign.EndDate.Date)
+        if (currentDate > campaign.EndDate.Date || campaign.ResultsConcluded)
             throw new FaultException("It is forbidden to create offers for campaign that ended!");
 
         var numberOfAgentOffers = await databaseContext

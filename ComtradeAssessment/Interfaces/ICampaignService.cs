@@ -10,5 +10,11 @@ public interface ICampaignService
     Task<CampaignResponseDto> CreateCampaign(CreateCampaignRequest request);
 
     [OperationContract]
-    Task<CampaignResultsResponseDto> CampaignResults(GetCampaignResults request);
+    Task<CampaignResponseDto> UpdateCampaign(UpdateCampaignRequest request);
+
+    [OperationContract]
+    Task DeleteCampaign(int campaignId);
+
+    [OperationContract]
+    Task<CampaignDetailsResponseDto> CampaignDetails(int campaignId);
 }

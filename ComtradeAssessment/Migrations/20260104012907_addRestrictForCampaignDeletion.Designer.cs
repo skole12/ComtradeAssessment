@@ -4,6 +4,7 @@ using ComtradeAssessment.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,12 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ComtradeAssessment.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20260104012907_addRestrictForCampaignDeletion")]
+    partial class addRestrictForCampaignDeletion
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("TestZadatak")
                 .HasAnnotation("ProductVersion", "9.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
@@ -50,7 +54,7 @@ namespace ComtradeAssessment.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Campaigns");
+                    b.ToTable("Campaigns", "TestZadatak");
                 });
 
             modelBuilder.Entity("ComtradeAssessment.Entities.CampaignOffer", b =>
@@ -81,7 +85,7 @@ namespace ComtradeAssessment.Migrations
 
                     b.HasIndex("AgentId");
 
-                    b.ToTable("CampaignOffers");
+                    b.ToTable("CampaignOffers", "TestZadatak");
                 });
 
             modelBuilder.Entity("ComtradeAssessment.Entities.CampaignPurchase", b =>
@@ -115,7 +119,7 @@ namespace ComtradeAssessment.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CampaignPurchases");
+                    b.ToTable("CampaignPurchases", "TestZadatak");
                 });
 
             modelBuilder.Entity("ComtradeAssessment.Entities.Role", b =>
@@ -130,7 +134,7 @@ namespace ComtradeAssessment.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", "TestZadatak");
                 });
 
             modelBuilder.Entity("ComtradeAssessment.Entities.User", b =>
@@ -164,7 +168,7 @@ namespace ComtradeAssessment.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", "TestZadatak");
                 });
 
             modelBuilder.Entity("ComtradeAssessment.Entities.CampaignOffer", b =>

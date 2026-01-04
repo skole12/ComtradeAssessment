@@ -22,6 +22,7 @@ public static class ServiceCollectionExtensions
         );
         services.AddHttpContextAccessor();
         services.Configure<JwtSettings>(config.GetSection("JwtSettings"));
+        services.Configure<FileStorageSettings>(config.GetSection("FileStorage"));
 
         services.AddHangfire(options =>
             options

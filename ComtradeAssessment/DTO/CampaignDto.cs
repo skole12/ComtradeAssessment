@@ -32,24 +32,45 @@ public class CampaignResponseDto
 }
 
 [DataContract(Namespace = "http://tempuri.org/")]
-public class GetCampaignResults
-{
-    [DataMember(Order = 1)]
-    public int CampaignId { get; set; }
-}
-
-[DataContract(Namespace = "http://tempuri.org/")]
-public class CampaignResultsResponseDto
+public class CampaignDetailsResponseDto
 {
     [DataMember(Order = 1)]
     public int CampaignId { get; set; }
 
     [DataMember(Order = 2)]
-    public int DiscountsOffered { get; set; }
+    public string Name { get; set; }
 
     [DataMember(Order = 3)]
-    public int PurchasesMade { get; set; }
+    public DateTime StartDate { get; set; }
 
     [DataMember(Order = 4)]
+    public DateTime EndDate { get; set; }
+
+    [DataMember(Order = 5)]
+    public bool ResultsConcluded { get; set; }
+
+    [DataMember(Order = 6)]
+    public int DiscountsOffered { get; set; }
+
+    [DataMember(Order = 7)]
+    public int PurchasesMade { get; set; }
+
+    [DataMember(Order = 8)]
     public float SuccessRate { get; set; }
+}
+
+[DataContract(Namespace = "http://tempuri.org/")]
+public class UpdateCampaignRequest
+{
+    [DataMember(Order = 1)]
+    public int Id { get; set; }
+
+    [DataMember(Order = 2)]
+    public string Name { get; set; }
+
+    [DataMember(Order = 3)]
+    public DateTime StartDate { get; set; }
+
+    [DataMember(Order = 4)]
+    public DateTime EndDate { get; set; }
 }
