@@ -115,8 +115,15 @@ public class CampaignService(IDatabaseContext databaseContext, IMapper mapper)
 
             var trackingId = Guid.NewGuid();
 
+            //creating temp file as to not send base64string as argument to job method
+            var fileId = Guid.NewGuid();
+            var bytes = Convert.FromBase64String(request.FileContentBase64);
+            Directory.CreateDirectory("imports");
+            var path = Path.Combine("imports", $"{fileId}.csv");
+            await System.IO.File.WriteAllBytesAsync(path, bytes);
+
             var hangfireJobId = BackgroundJob.Enqueue<PurchaseImportWorker>(worker =>
-                worker.ProcessCsv(trackingId, request.CampaignId, request.FileContentBase64)
+                worker.ProcessCsv(trackingId, request.CampaignId, path)
             );
 
             await databaseContext.BackgroundJobStatuses.AddAsync(
@@ -144,11 +151,37 @@ public class CampaignService(IDatabaseContext databaseContext, IMapper mapper)
         }
     }
 
+    [AuthorizeByRole(ERole.SalesManager)]
     public async Task<CampaignJobResponseDto> JobStatus(Guid jobId)
     {
         var job = await databaseContext.BackgroundJobStatuses.FindAsync(jobId);
         if (job == null)
             throw new FaultException("Job does not exist");
         return mapper.Map<CampaignJobResponseDto>(job);
+    }
+
+    [AuthorizeByRole(ERole.SalesManager)]
+    public async Task<DownloadResultsFileResponse> DownloadResultsFile(int campaignId)
+    {
+        var campaign =
+            await databaseContext.Campaigns.FirstOrDefaultAsync(c => c.Id == campaignId)
+            ?? throw new FaultException("Campaign not found");
+
+        if (string.IsNullOrEmpty(campaign.CsvResultsPath))
+            throw new FaultException("Results file not available");
+
+        var filePath = campaign.CsvResultsPath;
+
+        if (!File.Exists(filePath))
+            throw new FaultException("File does not exist on disk");
+
+        byte[] fileBytes = await File.ReadAllBytesAsync(filePath);
+
+        return new DownloadResultsFileResponse
+        {
+            FileName = Path.GetFileName(filePath),
+            ContentType = "application/octet-stream",
+            FileContentBase64 = Convert.ToBase64String(fileBytes),
+        };
     }
 }

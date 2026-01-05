@@ -23,7 +23,8 @@ public class PurchaseImportWorker(
     private readonly IOptions<FileStorageSettings> fileStorage = fileStorage;
 
     [AutomaticRetry(Attempts = 0)]
-    public async Task ProcessCsv(Guid jobId, int campaignId, string base64Content)
+    [DisableConcurrentExecution(30 * 60)]
+    public async Task ProcessCsv(Guid jobId, int campaignId, string path)
     {
         var job = await databaseContext.BackgroundJobStatuses.FindAsync(jobId);
         job!.State = JobState.Processing;
@@ -34,77 +35,30 @@ public class PurchaseImportWorker(
             using var scope = serviceScopeFactory.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
 
-            var fileBytes = Convert.FromBase64String(base64Content);
-
             var seen = new HashSet<int>();
             var duplicates = new HashSet<int>();
             var invalidDates = new List<string>();
 
-            using (var validationStream = new MemoryStream(fileBytes))
-            using (var reader = new StreamReader(validationStream))
-            {
-                // skip header
-                reader.ReadLine();
-                var rowNumber = 1;
-
-                while (!reader.EndOfStream)
-                {
-                    rowNumber++;
-                    var line = reader.ReadLine();
-                    if (string.IsNullOrWhiteSpace(line))
-                        continue;
-
-                    var columns = line.Split(';');
-                    if (columns.Length < 2)
-                        continue;
-
-                    if (!int.TryParse(columns[0].Trim(), out var customerId))
-                        throw new Exception($"Invalid customerId Row {rowNumber}: {columns[0]}");
-
-                    if (!seen.Add(customerId))
-                    {
-                        duplicates.Add(customerId);
-                    }
-
-                    if (
-                        !DateTime.TryParseExact(
-                            columns[1].Trim(),
-                            "d.M.yyyy",
-                            CultureInfo.InvariantCulture,
-                            DateTimeStyles.None,
-                            out _
-                        )
-                    )
-                    {
-                        invalidDates.Add($"Row {rowNumber}: '{columns[1]}'");
-                    }
-                }
-            }
-            if (duplicates.Count != 0 || invalidDates.Count != 0)
-            {
-                var errors = new List<string>();
-
-                if (duplicates.Count != 0)
-                    errors.Add($"Double customerIds: {string.Join(", ", duplicates)}");
-
-                if (invalidDates.Count != 0)
-                    errors.Add($"Invalid dates: {string.Join("; ", invalidDates)}");
-
-                throw new Exception(string.Join(" | ", errors));
-            }
-
-            using var processingStream = new MemoryStream(fileBytes);
-            using var readerProcessing = new StreamReader(processingStream);
-
-            var batchSize = 3000;
+            const int batchSize = 3000;
             var batch = new List<(int CustomerId, DateTime PurchaseDate, string? Note)>(batchSize);
 
-            // skip header
-            readerProcessing.ReadLine();
+            await using var stream = new FileStream(
+                path,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read
+            );
 
-            while (!readerProcessing.EndOfStream)
+            using var reader = new StreamReader(stream);
+
+            // skip header
+            await reader.ReadLineAsync();
+            var rowNumber = 1;
+
+            while (!reader.EndOfStream)
             {
-                var line = readerProcessing.ReadLine();
+                rowNumber++;
+                var line = await reader.ReadLineAsync();
                 if (string.IsNullOrWhiteSpace(line))
                     continue;
 
@@ -112,13 +66,32 @@ public class PurchaseImportWorker(
                 if (columns.Length < 2)
                     continue;
 
-                batch.Add(
-                    (
-                        CustomerId: int.Parse(columns[0].Trim()),
-                        PurchaseDate: DateTime.Parse(columns[1].Trim()),
-                        Note: string.IsNullOrWhiteSpace(columns[2]) ? null : columns[2].Trim()
+                if (!int.TryParse(columns[0].Trim(), out var customerId))
+                    throw new Exception($"Invalid customerId. Row {rowNumber}: {columns[0]}");
+
+                if (!seen.Add(customerId))
+                    duplicates.Add(customerId);
+
+                if (
+                    !DateTime.TryParseExact(
+                        columns[1].Trim(),
+                        "d.M.yyyy",
+                        CultureInfo.InvariantCulture,
+                        DateTimeStyles.None,
+                        out var purchaseDate
                     )
-                );
+                )
+                {
+                    invalidDates.Add($"Row {rowNumber}: '{columns[1]}'");
+                    continue;
+                }
+
+                var note =
+                    columns.Length > 2 && !string.IsNullOrWhiteSpace(columns[2])
+                        ? columns[2].Trim()
+                        : null;
+
+                batch.Add((customerId, purchaseDate, note));
 
                 if (batch.Count >= batchSize)
                 {
@@ -127,20 +100,37 @@ public class PurchaseImportWorker(
                 }
             }
 
+            if (duplicates.Count != 0 || invalidDates.Count != 0)
+            {
+                var errors = new List<string>();
+
+                if (duplicates.Count != 0)
+                    errors.Add($"Duplicate customerIds: {string.Join(", ", duplicates)}");
+
+                if (invalidDates.Count != 0)
+                    errors.Add($"Invalid dates: {string.Join("; ", invalidDates)}");
+
+                throw new Exception(string.Join(" | ", errors));
+            }
+
             if (batch.Count != 0)
                 await UpdateCampaignOffersBatch(context, campaignId, batch);
 
-            string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-            string fileName = $"campaignResults_{campaignId}_{timestamp}.csv";
-            string filePath = Path.Combine(fileStorage.Value.RootDirectory, fileName);
-            await File.WriteAllBytesAsync(filePath, fileBytes);
+            var timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
+            var fileName = $"campaignResults_{campaignId}_{timestamp}.csv";
+            var resultPath = Path.Combine(fileStorage.Value.RootDirectory, fileName);
+
+            Directory.CreateDirectory(fileStorage.Value.RootDirectory);
+
+            File.Copy(path, resultPath, overwrite: true);
 
             await context
                 .Campaigns.Where(c => c.Id == campaignId)
                 .ExecuteUpdateAsync(c =>
                     c.SetProperty(c => c.ResultsConcluded, true)
-                        .SetProperty(c => c.CsvResultsPath, filePath)
+                        .SetProperty(c => c.CsvResultsPath, resultPath)
                 );
+
             job.State = JobState.Succeeded;
         }
         catch (Exception ex)
@@ -153,6 +143,10 @@ public class PurchaseImportWorker(
         {
             job.FinishedAt = DateTime.UtcNow;
             await databaseContext.SaveChangesAsync();
+
+            // temp file cleanup
+            if (File.Exists(path))
+                File.Delete(path);
         }
     }
 

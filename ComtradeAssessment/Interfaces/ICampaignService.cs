@@ -24,4 +24,7 @@ public interface ICampaignService : IBaseEntityService<Campaign, CampaignRespons
 
     [OperationContract]
     Task<CampaignJobResponseDto> JobStatus(Guid jobId);
+
+    [OperationContract]
+    Task<DownloadResultsFileResponse> DownloadResultsFile(int campaignId);
 }

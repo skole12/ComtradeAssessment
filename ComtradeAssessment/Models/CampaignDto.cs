@@ -116,3 +116,16 @@ public class CampaignJobResponseDto
     [DataMember(Order = 5)]
     public DateTime? FinishedAt { get; set; }
 }
+
+[DataContract(Namespace = "http://tempuri.org/")]
+public class DownloadResultsFileResponse
+{
+    [DataMember]
+    public string FileName { get; set; }
+
+    [DataMember]
+    public string ContentType { get; set; }
+
+    [DataMember]
+    public string FileContentBase64 { get; set; }
+}
