@@ -93,7 +93,7 @@ public class UserService(IDatabaseContext databaseContext, IOptions<JwtSettings>
             IsActive = true,
         };
 
-        databaseContext.Set<User>().Add(user);
+        databaseContext.Users.Add(user);
         await databaseContext.SaveChangesAsync();
 
         return new UserDto

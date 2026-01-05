@@ -80,7 +80,7 @@ public class CampaignOfferService(
     /// </summary>
     /// <param name="request">The request containing the ID of the campaign offer to delete.</param>
     [AuthorizeByRole(ERole.SalesAgent)]
-    public async Task Delete(DeleteCampaignOfferRequest request)
+    public async Task Delete(CreateCampaignOfferRequest request)
     {
         var campaign = await databaseContext.Campaigns.FindAsync(request.CampaignId);
 

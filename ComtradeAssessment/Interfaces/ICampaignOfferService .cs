@@ -11,5 +11,5 @@ public interface ICampaignOfferService : IBaseEntityService<CampaignOffer, Campa
     Task<CampaignOfferResponseDto> Create(CreateCampaignOfferRequest request);
 
     [OperationContract]
-    Task Delete(DeleteCampaignOfferRequest request);
+    Task Delete(CreateCampaignOfferRequest request);
 }

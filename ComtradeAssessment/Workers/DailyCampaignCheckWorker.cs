@@ -9,7 +9,7 @@ public class DailyCampaignCheckWorker(IDatabaseContext databaseContext)
 
     public async Task Execute()
     {
-        var todayUtc = DateTime.UtcNow.Date;
+        var todayUtc = DateTime.Today;
 
         await databaseContext
             .Campaigns.Where(c => c.IsActive && c.EndDate < todayUtc)

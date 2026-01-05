@@ -40,6 +40,7 @@ public class CampaignService(
             EndDate = request.EndDate,
             CreatedAt = DateTime.UtcNow,
             CreatedBy = new Guid(userId),
+            IsActive = true,
         };
 
         databaseContext.Campaigns.Add(campaign);

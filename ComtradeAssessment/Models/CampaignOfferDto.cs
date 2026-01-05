@@ -37,17 +37,6 @@ public class CampaignOfferResponseDto
     public string? Note { get; set; }
 }
 
-[DataContract(Namespace = "http://tempuri.org/")]
-public class DeleteCampaignOfferRequest
-{
-    [DataMember(Order = 1, IsRequired = true)]
-    public int CampaignId { get; set; }
-
-    [DataMember(Order = 2, IsRequired = true)]
-    public int CustomerId { get; set; }
-}
-
-[DataContract(Namespace = "http://tempuri.org/")]
 public class GetAllCampaignOffersResponse
 {
     [DataMember(Order = 1)]

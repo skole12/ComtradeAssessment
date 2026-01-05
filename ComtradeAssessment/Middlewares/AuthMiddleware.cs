@@ -109,7 +109,7 @@ public sealed class AuthMiddleware
                 )
             );
 
-        // Ako metoda nije pronađena → secure by default
+        // if method does not have authorization annotation, it is secured by default
         if (method == null)
         {
             return new AuthRule { RequiresAuth = true };
@@ -122,11 +122,7 @@ public sealed class AuthMiddleware
 
         var roleAttr = method.GetCustomAttribute<AuthorizeByRoleAttribute>();
 
-        return new AuthRule
-        {
-            RequiresAuth = true,
-            Roles = roleAttr?.Roles ?? Array.Empty<string>(),
-        };
+        return new AuthRule { RequiresAuth = true, Roles = roleAttr?.Roles ?? [] };
     }
 
     private ClaimsPrincipal ValidateBearerToken(XDocument doc, HttpContext context)
