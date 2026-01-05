@@ -5,10 +5,10 @@ namespace ComtradeAssessment.Models;
 [DataContract(Namespace = "http://tempuri.org/")]
 public class PurchaseImportDto
 {
-    [DataMember(Order = 1)]
+    [DataMember(Order = 1, IsRequired = true)]
     public int CampaignId { get; set; }
 
-    [DataMember(Order = 2)]
+    [DataMember(Order = 2, IsRequired = true)]
     public string FileContentBase64 { get; set; }
 }
 

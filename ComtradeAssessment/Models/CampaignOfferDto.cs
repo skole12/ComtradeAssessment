@@ -5,10 +5,10 @@ namespace ComtradeAssessment.Models;
 [DataContract(Namespace = "http://tempuri.org/")]
 public class CreateCampaignOfferRequest
 {
-    [DataMember(Order = 1)]
+    [DataMember(Order = 1, IsRequired = true)]
     public int CampaignId { get; set; }
 
-    [DataMember(Order = 2)]
+    [DataMember(Order = 2, IsRequired = true)]
     public int CustomerId { get; set; }
 }
 
@@ -40,10 +40,10 @@ public class CampaignOfferResponseDto
 [DataContract(Namespace = "http://tempuri.org/")]
 public class DeleteCampaignOfferRequest
 {
-    [DataMember(Order = 1)]
+    [DataMember(Order = 1, IsRequired = true)]
     public int CampaignId { get; set; }
 
-    [DataMember(Order = 2)]
+    [DataMember(Order = 2, IsRequired = true)]
     public int CustomerId { get; set; }
 }
 

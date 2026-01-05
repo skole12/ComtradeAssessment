@@ -5,18 +5,18 @@ namespace ComtradeAssessment.Models;
 [DataContract(Namespace = "http://tempuri.org/")]
 public class RegisterDto
 {
-    [DataMember(Order = 1)]
+    [DataMember(Order = 1, IsRequired = true)]
     public string FullName { get; set; }
 
-    [DataMember(Order = 2)]
+    [DataMember(Order = 2, IsRequired = true)]
     public string Email { get; set; }
 
-    [DataMember(Order = 3)]
+    [DataMember(Order = 3, IsRequired = true)]
     public string Password { get; set; }
 
-    [DataMember(Order = 4)]
+    [DataMember(Order = 4, IsRequired = true)]
     public Guid RoleId { get; set; }
 
-    [DataMember(Order = 5)]
+    [DataMember(Order = 5, IsRequired = true)]
     public DateTime DateOfBirth { get; set; }
 }

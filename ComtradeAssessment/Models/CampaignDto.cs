@@ -7,13 +7,13 @@ namespace ComtradeAssessment.Models;
 [DataContract(Namespace = "http://tempuri.org/")]
 public class CreateCampaignRequest
 {
-    [DataMember(Order = 1)]
+    [DataMember(Order = 1, IsRequired = true)]
     public string Name { get; set; }
 
-    [DataMember(Order = 2)]
+    [DataMember(Order = 2, IsRequired = true)]
     public DateTime StartDate { get; set; }
 
-    [DataMember(Order = 3)]
+    [DataMember(Order = 3, IsRequired = true)]
     public DateTime EndDate { get; set; }
 }
 
@@ -85,19 +85,19 @@ public class CampaignDetailsResponseDto
 [DataContract(Namespace = "http://tempuri.org/")]
 public class UpdateCampaignRequest
 {
-    [DataMember(Order = 1)]
+    [DataMember(Order = 1, IsRequired = true)]
     public int Id { get; set; }
 
-    [DataMember(Order = 2)]
+    [DataMember(Order = 2, IsRequired = true)]
     public string Name { get; set; }
 
-    [DataMember(Order = 3)]
+    [DataMember(Order = 3, IsRequired = true)]
     public DateTime StartDate { get; set; }
 
-    [DataMember(Order = 4)]
+    [DataMember(Order = 4, IsRequired = true)]
     public DateTime EndDate { get; set; }
 
-    [DataMember(Order = 5)]
+    [DataMember(Order = 5, IsRequired = true)]
     public bool IsActive { get; set; }
 }
 
