@@ -1,5 +1,5 @@
 ﻿using System.ServiceModel;
-using ComtradeAssessment.DTO;
+using ComtradeAssessment.Models;
 
 namespace ComtradeAssessment.Interfaces;
 

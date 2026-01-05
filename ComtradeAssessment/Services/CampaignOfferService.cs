@@ -2,9 +2,9 @@
 using AutoMapper;
 using ComtradeAssessment.Attributes;
 using ComtradeAssessment.Constants;
-using ComtradeAssessment.DTO;
 using ComtradeAssessment.Entities;
 using ComtradeAssessment.Interfaces;
+using ComtradeAssessment.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ComtradeAssessment.Services;
@@ -35,7 +35,12 @@ public class CampaignOfferService
             await databaseContext.Campaigns.FindAsync(request.CampaignId)
             ?? throw new FaultException("Campaign does not exist!");
 
-        if (currentDate > campaign.EndDate.Date || campaign.ResultsConcluded)
+        if (!campaign.IsActive)
+            throw new FaultException(
+                "It is not possible to create offers for campaign that is not active!"
+            );
+
+        if (campaign.ResultsConcluded)
             throw new FaultException("It is forbidden to create offers for campaign that ended!");
 
         var numberOfAgentOffers = await databaseContext

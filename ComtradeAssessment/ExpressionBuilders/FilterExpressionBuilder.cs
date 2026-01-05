@@ -1,5 +1,5 @@
 ﻿using System.Linq.Expressions;
-using ComtradeAssessment.DTO;
+using ComtradeAssessment.Models;
 
 namespace ComtradeAssessment.ExpressionBuilders;
 

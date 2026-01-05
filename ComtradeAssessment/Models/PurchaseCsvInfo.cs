@@ -1,4 +1,4 @@
-﻿namespace ComtradeAssessment.DTO;
+﻿namespace ComtradeAssessment.Models;
 
 public class PurchaseCsvInfo
 {

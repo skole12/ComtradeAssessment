@@ -16,7 +16,12 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options)
 
     #endregion
 
-
     public new DbSet<TEntity> Set<TEntity>()
         where TEntity : class => base.Set<TEntity>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Campaign>().Property(e => e.IsActive).HasDefaultValue(true);
+        modelBuilder.Entity<Campaign>().Property(e => e.ResultsConcluded).HasDefaultValue(false);
+    }
 }

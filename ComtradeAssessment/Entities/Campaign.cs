@@ -19,8 +19,10 @@ public class Campaign
     [Required]
     public DateTime EndDate { get; set; }
 
-    [DefaultValue(false)]
     public bool ResultsConcluded { get; set; }
+
+    [DefaultValue(true)]
+    public bool IsActive { get; set; }
 
     [StringLength(200)]
     public string? CsvResultsPath { get; set; }

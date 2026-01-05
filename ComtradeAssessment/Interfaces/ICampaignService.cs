@@ -1,6 +1,6 @@
 ﻿using System.ServiceModel;
-using ComtradeAssessment.DTO;
 using ComtradeAssessment.Entities;
+using ComtradeAssessment.Models;
 
 namespace ComtradeAssessment.Interfaces;
 

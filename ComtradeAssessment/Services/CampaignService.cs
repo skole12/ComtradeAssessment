@@ -1,12 +1,10 @@
-﻿using System.Linq.Expressions;
-using System.ServiceModel;
+﻿using System.ServiceModel;
 using AutoMapper;
 using ComtradeAssessment.Attributes;
 using ComtradeAssessment.Constants;
-using ComtradeAssessment.DTO;
 using ComtradeAssessment.Entities;
 using ComtradeAssessment.Interfaces;
-using ComtradeAssessment.Specifications;
+using ComtradeAssessment.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ComtradeAssessment.Services;
@@ -28,18 +26,13 @@ public class CampaignService(IDatabaseContext databaseContext, IMapper mapper)
             Name = request.Name,
             StartDate = request.StartDate,
             EndDate = request.EndDate,
+            IsActive = true,
         };
 
         databaseContext.Campaigns.Add(campaign);
         await databaseContext.SaveChangesAsync();
 
-        return new CampaignResponseDto
-        {
-            Id = campaign.Id,
-            Name = campaign.Name,
-            StartDate = campaign.StartDate,
-            EndDate = campaign.EndDate,
-        };
+        return mapper.Map<CampaignResponseDto>(campaign);
     }
 
     [AuthorizeByRole(ERole.SalesManager)]
@@ -54,6 +47,7 @@ public class CampaignService(IDatabaseContext databaseContext, IMapper mapper)
                 StartDate = c.StartDate,
                 EndDate = c.EndDate,
                 ResultsConcluded = c.ResultsConcluded,
+                IsActive = c.IsActive,
                 DiscountsOffered = c.CampaignOffers.Count(),
                 PurchasesMade = c.CampaignOffers.Count(co => co.MadePurchase),
                 SuccessRate =
@@ -97,16 +91,10 @@ public class CampaignService(IDatabaseContext databaseContext, IMapper mapper)
         campaign.Name = request.Name;
         campaign.StartDate = request.StartDate;
         campaign.EndDate = request.EndDate;
+        campaign.IsActive = request.IsActive;
 
         await databaseContext.SaveChangesAsync();
 
-        return new CampaignResponseDto
-        {
-            Id = campaign.Id,
-            Name = campaign.Name,
-            StartDate = campaign.StartDate,
-            EndDate = campaign.EndDate,
-            ResultsConcluded = campaign.ResultsConcluded,
-        };
+        return mapper.Map<CampaignResponseDto>(campaign);
     }
 }

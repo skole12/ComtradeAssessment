@@ -1,8 +1,8 @@
 ﻿using System.Linq.Expressions;
-using ComtradeAssessment.DTO;
 using ComtradeAssessment.ExpressionBuilders;
 using ComtradeAssessment.Extensions;
 using ComtradeAssessment.Interfaces;
+using ComtradeAssessment.Models;
 
 namespace ComtradeAssessment.Specifications;
 

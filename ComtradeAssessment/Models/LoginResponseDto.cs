@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace ComtradeAssessment.DTO;
+namespace ComtradeAssessment.Models;
 
 public class LoginResponseDto
 {

@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace ComtradeAssessment.DTO;
+namespace ComtradeAssessment.Models;
 
 [DataContract(Namespace = "http://tempuri.org/")]
 public class LoginDto

@@ -1,8 +1,8 @@
 ﻿using System.Globalization;
 using System.ServiceModel;
 using ComtradeAssessment.Context;
-using ComtradeAssessment.DTO;
 using ComtradeAssessment.Extensions;
+using ComtradeAssessment.Models;
 using EFCore.BulkExtensions;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;

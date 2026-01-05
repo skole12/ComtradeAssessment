@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace ComtradeAssessment.DTO;
+namespace ComtradeAssessment.Models;
 
 [DataContract(Namespace = "http://tempuri.org/")]
 public class CreateCampaignRequest
@@ -32,6 +32,9 @@ public class CampaignResponseDto
 
     [DataMember(Order = 5)]
     public bool ResultsConcluded { get; set; }
+
+    [DataMember(Order = 6)]
+    public bool IsActive { get; set; }
 }
 
 [DataContract(Namespace = "http://tempuri.org/")]
@@ -53,12 +56,15 @@ public class CampaignDetailsResponseDto
     public bool ResultsConcluded { get; set; }
 
     [DataMember(Order = 6)]
-    public int DiscountsOffered { get; set; }
+    public bool IsActive { get; set; }
 
     [DataMember(Order = 7)]
-    public int PurchasesMade { get; set; }
+    public int DiscountsOffered { get; set; }
 
     [DataMember(Order = 8)]
+    public int PurchasesMade { get; set; }
+
+    [DataMember(Order = 9)]
     public float SuccessRate { get; set; }
 }
 
@@ -76,6 +82,9 @@ public class UpdateCampaignRequest
 
     [DataMember(Order = 4)]
     public DateTime EndDate { get; set; }
+
+    [DataMember(Order = 5)]
+    public bool IsActive { get; set; }
 }
 
 [DataContract]

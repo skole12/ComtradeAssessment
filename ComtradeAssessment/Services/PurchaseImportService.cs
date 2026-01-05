@@ -1,21 +1,16 @@
 ﻿using System.ServiceModel;
 using ComtradeAssessment.Attributes;
 using ComtradeAssessment.Constants;
-using ComtradeAssessment.DTO;
 using ComtradeAssessment.Interfaces;
+using ComtradeAssessment.Models;
 using ComtradeAssessment.Workers;
 using Hangfire;
 
 namespace ComtradeAssessment.Services;
 
-public class PurchaseImportService : IPurchaseImportService
+public class PurchaseImportService(IDatabaseContext databaseContext) : IPurchaseImportService
 {
-    private readonly IDatabaseContext databaseContext;
-
-    public PurchaseImportService(IDatabaseContext databaseContext)
-    {
-        this.databaseContext = databaseContext;
-    }
+    private readonly IDatabaseContext databaseContext = databaseContext;
 
     [AuthorizeByRole(ERole.SalesManager)]
     public async Task<PurchaseImportResponse> ImportPurchases(PurchaseImportDto request)
