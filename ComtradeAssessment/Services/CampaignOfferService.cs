@@ -34,13 +34,11 @@ public class CampaignOfferService(
             await databaseContext.Campaigns.FindAsync(request.CampaignId)
             ?? throw new FaultException("Campaign does not exist!");
 
-        if (!campaign.IsActive)
+        //cannot create offer for campaigns that have concluded results or are inactive
+        if (!campaign.IsActive || campaign.ResultsConcluded)
             throw new FaultException(
-                "It is not possible to create offers for campaign that is not active!"
+                "It is not possible to create offers for campaign that is not active or have concluded results!"
             );
-
-        if (campaign.ResultsConcluded)
-            throw new FaultException("It is forbidden to create offers for campaign that ended!");
 
         var numberOfAgentOffers = await databaseContext
             .CampaignOffers.Where(co =>
@@ -50,6 +48,7 @@ public class CampaignOfferService(
             )
             .CountAsync();
 
+        //5 offers per day constraint
         if (numberOfAgentOffers >= 5)
             throw new FaultException("It is forbidden to create more than 5 discounts per day!");
 

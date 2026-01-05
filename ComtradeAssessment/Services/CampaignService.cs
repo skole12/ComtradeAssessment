@@ -31,9 +31,7 @@ public class CampaignService(
         var userId = currentUserService.UserId;
 
         if (request.EndDate <= request.StartDate)
-        {
             throw new FaultException("EndDate must be greater than StartDate");
-        }
 
         var campaign = new Campaign
         {
@@ -90,6 +88,11 @@ public class CampaignService(
     [AuthorizeByRole(ERole.SalesManager)]
     public async Task Delete(int campaignId)
     {
+        var campaign = await databaseContext.Campaigns.FindAsync(campaignId);
+
+        if (campaign != null && campaign.ResultsConcluded)
+            throw new FaultException("Cannot delete campaign which have concluded results");
+
         var deletedRows = await databaseContext
             .Campaigns.Where(c => c.Id == campaignId)
             .ExecuteDeleteAsync();
@@ -137,9 +140,6 @@ public class CampaignService(
             var campaign =
                 await databaseContext.Campaigns.FindAsync(request.CampaignId)
                 ?? throw new Exception("Specified campaign does not exist");
-
-            if (campaign.ResultsConcluded)
-                throw new Exception("Results for this campaign are already imported.");
 
             var trackingId = Guid.NewGuid();
 
