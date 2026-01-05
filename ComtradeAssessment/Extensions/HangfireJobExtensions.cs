@@ -1,4 +1,5 @@
-﻿using ComtradeAssessment.Workers;
+﻿using ComtradeAssessment.Constants;
+using ComtradeAssessment.Workers;
 using Hangfire;
 
 namespace ComtradeAssessment.Extensions;
@@ -13,7 +14,7 @@ public static class HangfireJobExtensions
             "10 0 * * *",
             new RecurringJobOptions
             {
-                TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time"),
+                TimeZone = TimeZoneInfo.FindSystemTimeZoneById(ETimeZone.CentralEuropean),
             }
         );
     }
