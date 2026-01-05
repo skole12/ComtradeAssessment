@@ -1,5 +1,6 @@
 using ComtradeAssessment.Extensions;
 using ComtradeAssessment.Middlewares;
+using ComtradeAssessment.Workers;
 using Hangfire;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,7 @@ var app = builder.Build();
 app.UseRouting();
 app.UseHttpsRedirection();
 app.UseHangfireDashboard("/hangfire");
+app.RegisterRecurringJobs();
 
 app.UseMiddleware<AuthMiddleware>();
 
