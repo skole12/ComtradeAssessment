@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.ServiceModel;
+using AutoMapper;
 using ComtradeAssessment.DTO;
 using ComtradeAssessment.Interfaces;
 using ComtradeAssessment.Specifications;
@@ -12,8 +13,8 @@ namespace ComtradeAssessment.Services
     ) : IBaseEntityService<TEntity, TResponseDto>
         where TEntity : class
     {
-        protected readonly IDatabaseContext _databaseContext = databaseContext;
-        protected readonly IMapper _mapper = mapper;
+        protected readonly IDatabaseContext databaseContext = databaseContext;
+        protected readonly IMapper mapper = mapper;
         protected virtual HashSet<string> AllowedIncludes { get; } = [];
 
         /// <summary>
@@ -23,17 +24,18 @@ namespace ComtradeAssessment.Services
         /// <returns>
         /// A <see cref="PagedResult{TResponseDto}"/> containing the list of mapped items and total record count.
         /// </returns>
+        [OperationContract]
         public virtual async Task<PagedResult<TResponseDto>> GetAll(BaseRequest request)
         {
             var spec = CreateListSpecification(request);
             var countSpec = CreateCountSpecification(request);
 
             var query = SpecificationEvaluator<TEntity>.GetQuery(
-                _databaseContext.Set<TEntity>(),
+                databaseContext.Set<TEntity>(),
                 spec
             );
             var countQuery = SpecificationEvaluator<TEntity>.GetCountQuery(
-                _databaseContext.Set<TEntity>(),
+                databaseContext.Set<TEntity>(),
                 countSpec
             );
 
@@ -42,7 +44,7 @@ namespace ComtradeAssessment.Services
 
             return new PagedResult<TResponseDto>
             {
-                Items = _mapper.Map<List<TResponseDto>>(items),
+                Items = mapper.Map<List<TResponseDto>>(items),
                 Pagination = new PaginationResponse
                 {
                     PageNumber = request.Pagination.PageNumber,

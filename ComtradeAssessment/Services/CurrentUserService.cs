@@ -3,14 +3,9 @@ using ComtradeAssessment.Interfaces;
 
 namespace ComtradeAssessment.Services;
 
-public class CurrentUser : ICurrentUser
+public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICurrentUserService
 {
-    private readonly IHttpContextAccessor httpContextAccessor;
-
-    public CurrentUser(IHttpContextAccessor httpContextAccessor)
-    {
-        this.httpContextAccessor = httpContextAccessor;
-    }
+    private readonly IHttpContextAccessor httpContextAccessor = httpContextAccessor;
 
     public string UserId
     {

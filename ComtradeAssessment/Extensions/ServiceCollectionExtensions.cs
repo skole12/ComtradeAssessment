@@ -35,7 +35,7 @@ public static class ServiceCollectionExtensions
 
         services.AddHangfireServer();
 
-        services.AddScoped<ICurrentUser, CurrentUser>();
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ICampaignService, CampaignService>();
         services.AddScoped<ICampaignOfferService, CampaignOfferService>();

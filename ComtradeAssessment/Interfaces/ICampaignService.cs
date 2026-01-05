@@ -1,10 +1,10 @@
 ﻿using System.ServiceModel;
 using ComtradeAssessment.DTO;
+using ComtradeAssessment.Entities;
 
 namespace ComtradeAssessment.Interfaces;
 
-[ServiceContract(Namespace = "http://tempuri.org/")]
-public interface ICampaignService
+public interface ICampaignService : IBaseEntityService<Campaign, CampaignResponseDto>
 {
     [OperationContract]
     Task<CampaignResponseDto> Create(CreateCampaignRequest request);
@@ -17,7 +17,4 @@ public interface ICampaignService
 
     [OperationContract]
     Task<CampaignDetailsResponseDto> Details(int campaignId);
-
-    [OperationContract]
-    Task<PagedResult<CampaignResponseDto>> GetAll(BaseRequest request);
 }
