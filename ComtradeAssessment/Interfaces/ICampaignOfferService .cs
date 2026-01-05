@@ -8,8 +8,8 @@ namespace ComtradeAssessment.Interfaces;
 public interface ICampaignOfferService : IBaseEntityService<CampaignOffer, CampaignOfferResponseDto>
 {
     [OperationContract]
-    Task<CampaignOfferResponseDto> Create(CreateCampaignOfferRequest request);
+    Task<CampaignOfferResponseDto> Create(CampaignOfferRequest request);
 
     [OperationContract]
-    Task Delete(CreateCampaignOfferRequest request);
+    Task Delete(CampaignOfferRequest request);
 }

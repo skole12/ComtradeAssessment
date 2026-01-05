@@ -3,7 +3,7 @@
 namespace ComtradeAssessment.Models;
 
 [DataContract(Namespace = "http://tempuri.org/")]
-public class CreateCampaignOfferRequest
+public class CampaignOfferRequest
 {
     [DataMember(Order = 1, IsRequired = true)]
     public int CampaignId { get; set; }

@@ -25,7 +25,7 @@ public class CampaignOfferService(
     /// <param name="request">The request containing campaign offer details.</param>
     /// <returns>The created <see cref="CampaignOfferResponseDto"/>.</returns>
     [AuthorizeByRole(ERole.SalesAgent)]
-    public async Task<CampaignOfferResponseDto> Create(CreateCampaignOfferRequest request)
+    public async Task<CampaignOfferResponseDto> Create(CampaignOfferRequest request)
     {
         var currentDate = DateTime.UtcNow.Date;
         var userId = currentUserService.UserId;
@@ -80,7 +80,7 @@ public class CampaignOfferService(
     /// </summary>
     /// <param name="request">The request containing the ID of the campaign offer to delete.</param>
     [AuthorizeByRole(ERole.SalesAgent)]
-    public async Task Delete(CreateCampaignOfferRequest request)
+    public async Task Delete(CampaignOfferRequest request)
     {
         var campaign = await databaseContext.Campaigns.FindAsync(request.CampaignId);
 
