@@ -22,6 +22,7 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options)
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<User>().Property(e => e.IsActive).HasDefaultValue(true);
         modelBuilder.Entity<Campaign>().Property(e => e.IsActive).HasDefaultValue(true);
         modelBuilder.Entity<Campaign>().Property(e => e.ResultsConcluded).HasDefaultValue(false);
     }

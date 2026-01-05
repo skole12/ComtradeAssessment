@@ -16,4 +16,7 @@ public class RegisterDto
 
     [DataMember(Order = 4)]
     public Guid RoleId { get; set; }
+
+    [DataMember(Order = 5)]
+    public DateTime DateOfBirth { get; set; }
 }

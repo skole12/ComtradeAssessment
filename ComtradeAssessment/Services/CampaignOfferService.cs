@@ -90,4 +90,10 @@ public class CampaignOfferService(
         if (deletedRows == 0)
             throw new FaultException("Campaign offer not found");
     }
+
+    [AuthorizeByRole(ERole.SalesAgent)]
+    public override Task<PagedResult<CampaignOfferResponseDto>> GetAll(BaseRequest request)
+    {
+        return base.GetAll(request);
+    }
 }

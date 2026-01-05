@@ -1,4 +1,5 @@
 ﻿using System.Runtime.Serialization;
+using ComtradeAssessment.Entities;
 using ComtradeAssessment.Enums;
 
 namespace ComtradeAssessment.Models;
@@ -36,6 +37,12 @@ public class CampaignResponseDto
 
     [DataMember(Order = 6)]
     public bool IsActive { get; set; }
+
+    [DataMember(Order = 7)]
+    public DateTime CreatedAt { get; set; }
+
+    [DataMember(Order = 8)]
+    public Guid CreatedBy { get; set; }
 }
 
 [DataContract(Namespace = "http://tempuri.org/")]
@@ -67,6 +74,12 @@ public class CampaignDetailsResponseDto
 
     [DataMember(Order = 9)]
     public float SuccessRate { get; set; }
+
+    [DataMember(Order = 10)]
+    public DateTime CreatedAt { get; set; }
+
+    [DataMember(Order = 11)]
+    public Guid CreatedBy { get; set; }
 }
 
 [DataContract(Namespace = "http://tempuri.org/")]

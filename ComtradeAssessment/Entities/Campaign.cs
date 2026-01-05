@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
 namespace ComtradeAssessment.Entities;
@@ -26,6 +27,15 @@ public class Campaign
 
     [StringLength(200)]
     public string? CsvResultsPath { get; set; }
+
+    [Required]
+    public DateTime CreatedAt { get; set; }
+
+    [Required]
+    public Guid CreatedBy { get; set; }
+
+    [ForeignKey(nameof(CreatedBy))]
+    public virtual User CreatedByUser { get; set; }
 
     public ICollection<CampaignOffer> CampaignOffers { get; set; }
 }

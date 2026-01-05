@@ -11,4 +11,7 @@ public interface IUserService
 
     [OperationContract]
     Task<string> Login(LoginDto request);
+
+    [OperationContract]
+    Task ActivateUser(ActivateUserRequest request);
 }

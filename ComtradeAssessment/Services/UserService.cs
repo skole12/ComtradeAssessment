@@ -28,7 +28,11 @@ public class UserService(IDatabaseContext databaseContext, IOptions<JwtSettings>
             .Include(u => u.Role)
             .FirstOrDefaultAsync();
 
-        if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
+        if (
+            user == null
+            || !user.IsActive
+            || !BCrypt.Net.BCrypt.Verify(request.Password, user.Password)
+        )
         {
             throw new Exception("Invalid credentials");
         }
@@ -75,6 +79,8 @@ public class UserService(IDatabaseContext databaseContext, IOptions<JwtSettings>
             Email = request.Email,
             Password = BCrypt.Net.BCrypt.HashPassword(request.Password),
             RoleId = request.RoleId,
+            DateOfBirth = request.DateOfBirth,
+            IsActive = true,
         };
 
         databaseContext.Set<User>().Add(user);
@@ -85,6 +91,18 @@ public class UserService(IDatabaseContext databaseContext, IOptions<JwtSettings>
             Id = user.Id,
             FullName = user.FullName,
             Email = user.Email,
+            DateOfBirth = user.DateOfBirth,
+            IsActive = user.IsActive,
         };
+    }
+
+    [AuthorizeByRole(ERole.SuperAdmin)]
+    public async Task ActivateUser(ActivateUserRequest request)
+    {
+        var updatedRows = await databaseContext
+            .Users.Where(u => u.Id == request.UserId)
+            .ExecuteUpdateAsync(u => u.SetProperty(u => u.IsActive, request.IsActive));
+        if (updatedRows == 0)
+            throw new FaultException("User not found");
     }
 }

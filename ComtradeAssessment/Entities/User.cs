@@ -28,6 +28,12 @@ public class User
     [Required]
     public DateTime CreatedAt { get; set; }
 
+    [Required]
+    public DateTime DateOfBirth { get; set; }
+
+    [Required]
+    public bool IsActive { get; set; }
+
     [ForeignKey(nameof(RoleId))]
     public virtual Role Role { get; set; }
 }

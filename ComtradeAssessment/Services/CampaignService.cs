@@ -12,13 +12,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ComtradeAssessment.Services;
 
-public class CampaignService(IDatabaseContext databaseContext, IMapper mapper)
-    : BaseEntityService<Campaign, CampaignResponseDto>(databaseContext, mapper),
-        ICampaignService
+public class CampaignService(
+    IDatabaseContext databaseContext,
+    IMapper mapper,
+    ICurrentUserService currentUserService
+) : BaseEntityService<Campaign, CampaignResponseDto>(databaseContext, mapper), ICampaignService
 {
+    private readonly ICurrentUserService currentUserService = currentUserService;
+
     [AuthorizeByRole(ERole.SalesManager)]
     public async Task<CampaignResponseDto> Create(CreateCampaignRequest request)
     {
+        var userId = currentUserService.UserId;
+
         if (request.EndDate <= request.StartDate)
         {
             throw new FaultException("EndDate must be greater than StartDate");
@@ -29,7 +35,8 @@ public class CampaignService(IDatabaseContext databaseContext, IMapper mapper)
             Name = request.Name,
             StartDate = request.StartDate,
             EndDate = request.EndDate,
-            IsActive = true,
+            CreatedAt = DateTime.UtcNow,
+            CreatedBy = new Guid(userId),
         };
 
         databaseContext.Campaigns.Add(campaign);
@@ -49,6 +56,8 @@ public class CampaignService(IDatabaseContext databaseContext, IMapper mapper)
                 Name = c.Name,
                 StartDate = c.StartDate,
                 EndDate = c.EndDate,
+                CreatedAt = c.CreatedAt,
+                CreatedBy = c.CreatedBy,
                 ResultsConcluded = c.ResultsConcluded,
                 IsActive = c.IsActive,
                 DiscountsOffered = c.CampaignOffers.Count(),
@@ -183,5 +192,11 @@ public class CampaignService(IDatabaseContext databaseContext, IMapper mapper)
             ContentType = "application/octet-stream",
             FileContentBase64 = Convert.ToBase64String(fileBytes),
         };
+    }
+
+    [AuthorizeByRole(ERole.SalesManager)]
+    public override Task<PagedResult<CampaignResponseDto>> GetAll(BaseRequest request)
+    {
+        return base.GetAll(request);
     }
 }
