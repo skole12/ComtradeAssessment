@@ -25,5 +25,6 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options)
         modelBuilder.Entity<User>().Property(e => e.IsActive).HasDefaultValue(true);
         modelBuilder.Entity<Campaign>().Property(e => e.IsActive).HasDefaultValue(true);
         modelBuilder.Entity<Campaign>().Property(e => e.ResultsConcluded).HasDefaultValue(false);
+        modelBuilder.Entity<Role>().HasIndex(r => r.Name).IsUnique();
     }
 }
