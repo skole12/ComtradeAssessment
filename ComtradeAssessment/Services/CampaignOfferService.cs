@@ -19,6 +19,11 @@ public class CampaignOfferService(
 {
     private readonly ICurrentUserService currentUserService = currentUserService;
 
+    /// <summary>
+    /// Creates a new campaign offer role.
+    /// </summary>
+    /// <param name="request">The request containing campaign offer details.</param>
+    /// <returns>The created <see cref="CampaignOfferResponseDto"/>.</returns>
     [AuthorizeByRole(ERole.SalesAgent)]
     public async Task<CampaignOfferResponseDto> Create(CreateCampaignOfferRequest request)
     {
@@ -71,6 +76,10 @@ public class CampaignOfferService(
         };
     }
 
+    /// <summary>
+    /// Deletes a campaign offer based on the provided request.
+    /// </summary>
+    /// <param name="request">The request containing the ID of the campaign offer to delete.</param>
     [AuthorizeByRole(ERole.SalesAgent)]
     public async Task Delete(DeleteCampaignOfferRequest request)
     {

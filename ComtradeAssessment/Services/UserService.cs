@@ -20,6 +20,11 @@ public class UserService(IDatabaseContext databaseContext, IOptions<JwtSettings>
     private readonly IDatabaseContext databaseContext = databaseContext;
     private readonly JwtSettings jwtSettings = jwtOptions.Value;
 
+    /// <summary>
+    /// Authenticates a user and returns access token.
+    /// </summary>
+    /// <param name="request">The login request containing user credentials.</param>
+    /// <returns>A string representing the authentication token or session ID.</returns>
     [AllowAnonymous]
     public async Task<string> Login(LoginDto request)
     {
@@ -61,6 +66,11 @@ public class UserService(IDatabaseContext databaseContext, IOptions<JwtSettings>
         return tokenString;
     }
 
+    /// <summary>
+    /// Registers a new user in the system.
+    /// </summary>
+    /// <param name="request">The registration details of the new user.</param>
+    /// <returns>The created <see cref="UserDto"/> representing the new user.</returns>
     [AuthorizeByRole(ERole.SuperAdmin)]
     public async Task<UserDto> RegisterUser(RegisterDto request)
     {
@@ -96,6 +106,10 @@ public class UserService(IDatabaseContext databaseContext, IOptions<JwtSettings>
         };
     }
 
+    /// <summary>
+    /// Activates or deactivates a user based on the provided request.
+    /// </summary>
+    /// <param name="request">The request containing the user ID and desired active state.</param>
     [AuthorizeByRole(ERole.SuperAdmin)]
     public async Task ActivateUser(ActivateUserRequest request)
     {

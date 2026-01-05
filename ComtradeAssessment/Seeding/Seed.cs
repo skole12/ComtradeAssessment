@@ -7,6 +7,11 @@ namespace ComtradeAssessment.Seeding;
 
 public static class Seed
 {
+    /// <summary>
+    /// Seeds initial data into the database using the provided service provider.
+    /// </summary>
+    /// <param name="serviceProvider">The <see cref="IServiceProvider"/> used to resolve required services for seeding.</param>
+    /// <returns>A task representing the asynchronous seeding operation.</returns>
     public static async Task SeedData(IServiceProvider serviceProvider)
     {
         using var scope = serviceProvider.CreateScope();

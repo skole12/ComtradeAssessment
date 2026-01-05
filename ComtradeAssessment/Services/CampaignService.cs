@@ -20,6 +20,11 @@ public class CampaignService(
 {
     private readonly ICurrentUserService currentUserService = currentUserService;
 
+    /// <summary>
+    /// Creates a new campaign based on the provided request.
+    /// </summary>
+    /// <param name="request">The request containing campaign details.</param>
+    /// <returns>The created <see cref="CampaignResponseDto"/> representing the new campaign.</returns>
     [AuthorizeByRole(ERole.SalesManager)]
     public async Task<CampaignResponseDto> Create(CreateCampaignRequest request)
     {
@@ -45,6 +50,11 @@ public class CampaignService(
         return mapper.Map<CampaignResponseDto>(campaign);
     }
 
+    /// <summary>
+    /// Retrieves the details of a campaign by its ID.
+    /// </summary>
+    /// <param name="campaignId">The ID of the campaign to retrieve.</param>
+    /// <returns>The <see cref="CampaignDetailsResponseDto"/> containing the campaign details.</returns>
     [AuthorizeByRole(ERole.SalesManager)]
     public async Task<CampaignDetailsResponseDto> Details(int campaignId)
     {
@@ -74,6 +84,9 @@ public class CampaignService(
         return result ?? throw new FaultException("Campaign not found");
     }
 
+    /// <summary>
+    /// Deletes a campaign identified by the given campaign ID.
+    /// </summary>
     [AuthorizeByRole(ERole.SalesManager)]
     public async Task Delete(int campaignId)
     {
@@ -85,6 +98,9 @@ public class CampaignService(
             throw new FaultException("Campaign not found");
     }
 
+    /// <summary>
+    /// Updates an existing campaign with the provided details.
+    /// </summary>
     [AuthorizeByRole(ERole.SalesManager)]
     public async Task<CampaignResponseDto> Update(UpdateCampaignRequest request)
     {
@@ -110,6 +126,9 @@ public class CampaignService(
         return mapper.Map<CampaignResponseDto>(campaign);
     }
 
+    /// <summary>
+    /// Imports purchases for a campaign based on the provided import data.
+    /// </summary>
     [AuthorizeByRole(ERole.SalesManager)]
     public async Task<PurchaseImportResponse> ImportPurchases(PurchaseImportDto request)
     {
@@ -160,6 +179,9 @@ public class CampaignService(
         }
     }
 
+    /// <summary>
+    /// Retrieves the status of a Hangfire job by its ID.
+    /// </summary>
     [AuthorizeByRole(ERole.SalesManager)]
     public async Task<CampaignJobResponseDto> JobStatus(Guid jobId)
     {
@@ -169,6 +191,9 @@ public class CampaignService(
         return mapper.Map<CampaignJobResponseDto>(job);
     }
 
+    /// <summary>
+    /// Downloads the file associated with the imported results for the specified campaign.
+    /// </summary>
     [AuthorizeByRole(ERole.SalesManager)]
     public async Task<DownloadResultsFileResponse> DownloadResultsFile(int campaignId)
     {

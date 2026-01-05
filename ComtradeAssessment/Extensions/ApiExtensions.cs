@@ -5,6 +5,9 @@ namespace ComtradeAssessment.Extensions;
 
 public static class ApiExtensions
 {
+    /// <summary>
+    /// Maps all application SOAP service endpoints to their respective routes.
+    /// </summary>
     public static IEndpointRouteBuilder MapSoapEndpoints(this IEndpointRouteBuilder endpoints)
     {
         endpoints.UseSoapEndpoint<IUserService>(

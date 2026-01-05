@@ -5,6 +5,13 @@ namespace ComtradeAssessment.ExpressionBuilders;
 
 public static class FilterExpressionBuilder<T>
 {
+    /// <summary>
+    /// Builds a LINQ expression for a given <see cref="Filter"/> to use in queries.
+    /// </summary>
+    /// <typeparam name="T">The entity type to filter.</typeparam>
+    /// <param name="filter">The filter containing field, operator, and value.</param>
+    /// <returns>An <see cref="Expression{Func}"/> representing the filter condition.</returns>
+    /// <exception cref="NotSupportedException">Thrown if the filter operator is not supported.</exception>
     public static Expression<Func<T, bool>> Build(Filter filter)
     {
         var parameter = Expression.Parameter(typeof(T), "x");

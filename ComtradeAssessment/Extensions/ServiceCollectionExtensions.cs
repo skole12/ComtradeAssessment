@@ -10,6 +10,19 @@ namespace ComtradeAssessment.Extensions;
 
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    /// Registers all application-level services into the dependency injection container.
+    /// </summary>
+    /// <param name="services">
+    /// The <see cref="IServiceCollection"/> to which the application services will be added.
+    /// </param>
+    /// <param name="config">
+    /// The <see cref="IConfiguration"/> instance used to access application settings,
+    /// e.g., for configuring options or seeding initial data.
+    /// </param>
+    /// <returns>
+    /// The updated <see cref="IServiceCollection"/> with all application services registered.
+    /// </returns>
     public static IServiceCollection AddApplicationServices(
         this IServiceCollection services,
         IConfiguration config

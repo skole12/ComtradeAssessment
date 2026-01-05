@@ -1,14 +1,7 @@
-﻿using ComtradeAssessment.Entities;
-
-namespace ComtradeAssessment.Attributes;
+﻿namespace ComtradeAssessment.Attributes;
 
 [AttributeUsage(AttributeTargets.Method)]
-public sealed class AuthorizeByRoleAttribute : Attribute
+public sealed class AuthorizeByRoleAttribute(params string[] roles) : Attribute
 {
-    public string[] Roles { get; }
-
-    public AuthorizeByRoleAttribute(params string[] roles)
-    {
-        Roles = roles.Select(r => r.ToString()).ToArray();
-    }
+    public string[] Roles { get; } = [.. roles.Select(r => r.ToString())];
 }
