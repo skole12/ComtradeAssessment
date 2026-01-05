@@ -12,19 +12,49 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ComtradeAssessment.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20260104004741_addResultsPath")]
-    partial class addResultsPath
+    [Migration("20260105214442_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasDefaultSchema("TestZadatak")
                 .HasAnnotation("ProductVersion", "9.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("ComtradeAssessment.Entities.BackgroundJobStatus", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Error")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("FinishedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("HangfireJobId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("State")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BackgroundJobStatuses");
+                });
 
             modelBuilder.Entity("ComtradeAssessment.Entities.Campaign", b =>
                 {
@@ -34,6 +64,12 @@ namespace ComtradeAssessment.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("CsvResultsPath")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
@@ -41,20 +77,29 @@ namespace ComtradeAssessment.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
                     b.Property<bool>("ResultsConcluded")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Campaigns", "TestZadatak");
+                    b.HasIndex("CreatedBy");
+
+                    b.ToTable("Campaigns");
                 });
 
             modelBuilder.Entity("ComtradeAssessment.Entities.CampaignOffer", b =>
@@ -85,41 +130,7 @@ namespace ComtradeAssessment.Migrations
 
                     b.HasIndex("AgentId");
 
-                    b.ToTable("CampaignOffers", "TestZadatak");
-                });
-
-            modelBuilder.Entity("ComtradeAssessment.Entities.CampaignPurchase", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<int>("Amount")
-                        .HasColumnType("int");
-
-                    b.Property<int>("AmountAfterDiscount")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CampaignId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Discount")
-                        .HasColumnType("int");
-
-                    b.Property<byte>("PaymentType")
-                        .HasColumnType("tinyint");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("CampaignPurchases", "TestZadatak");
+                    b.ToTable("CampaignOffers");
                 });
 
             modelBuilder.Entity("ComtradeAssessment.Entities.Role", b =>
@@ -130,11 +141,14 @@ namespace ComtradeAssessment.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles", "TestZadatak");
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("ComtradeAssessment.Entities.User", b =>
@@ -146,6 +160,9 @@ namespace ComtradeAssessment.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -155,6 +172,11 @@ namespace ComtradeAssessment.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("Password")
                         .IsRequired()
@@ -168,7 +190,18 @@ namespace ComtradeAssessment.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("Users", "TestZadatak");
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("ComtradeAssessment.Entities.Campaign", b =>
+                {
+                    b.HasOne("ComtradeAssessment.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedByUser");
                 });
 
             modelBuilder.Entity("ComtradeAssessment.Entities.CampaignOffer", b =>
@@ -180,9 +213,9 @@ namespace ComtradeAssessment.Migrations
                         .IsRequired();
 
                     b.HasOne("ComtradeAssessment.Entities.Campaign", "Campaign")
-                        .WithMany()
+                        .WithMany("CampaignOffers")
                         .HasForeignKey("CampaignId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Agent");
@@ -199,6 +232,11 @@ namespace ComtradeAssessment.Migrations
                         .IsRequired();
 
                     b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("ComtradeAssessment.Entities.Campaign", b =>
+                {
+                    b.Navigation("CampaignOffers");
                 });
 #pragma warning restore 612, 618
         }

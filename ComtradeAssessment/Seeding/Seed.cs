@@ -31,7 +31,7 @@ public static class Seed
         if (!await databaseContext.Users.AnyAsync(u => u.Role.Name == ERole.SuperAdmin))
         {
             var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-            var initialPassword = config["SeedUsers:SuperAdminPassword"];
+            var initialPassword = config["Seed:SuperAdminInitialPassword"];
 
             var superAdminRoleId = await databaseContext
                 .Roles.Where(r => r.Name == ERole.SuperAdmin)
