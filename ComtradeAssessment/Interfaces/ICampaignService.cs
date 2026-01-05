@@ -4,6 +4,7 @@ using ComtradeAssessment.Models;
 
 namespace ComtradeAssessment.Interfaces;
 
+[ServiceContract(Namespace = "http://tempuri.org/")]
 public interface ICampaignService : IBaseEntityService<Campaign, CampaignResponseDto>
 {
     [OperationContract]
@@ -17,4 +18,10 @@ public interface ICampaignService : IBaseEntityService<Campaign, CampaignRespons
 
     [OperationContract]
     Task<CampaignDetailsResponseDto> Details(int campaignId);
+
+    [OperationContract]
+    Task<PurchaseImportResponse> ImportPurchases(PurchaseImportDto request);
+
+    [OperationContract]
+    Task<CampaignJobResponseDto> JobStatus(Guid jobId);
 }

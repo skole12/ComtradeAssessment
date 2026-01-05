@@ -1,4 +1,5 @@
 ﻿using System.Runtime.Serialization;
+using ComtradeAssessment.Enums;
 
 namespace ComtradeAssessment.Models;
 
@@ -95,4 +96,23 @@ public class GetAllCampaignsResponse
 
     [DataMember(Order = 2)]
     public PaginationResponse Pagination { get; set; }
+}
+
+[DataContract(Namespace = "http://tempuri.org/")]
+public class CampaignJobResponseDto
+{
+    [DataMember(Order = 1)]
+    public Guid Id { get; set; }
+
+    [DataMember(Order = 2)]
+    public JobState State { get; set; }
+
+    [DataMember(Order = 3)]
+    public string? Error { get; set; }
+
+    [DataMember(Order = 4)]
+    public DateTime CreatedAt { get; set; }
+
+    [DataMember(Order = 5)]
+    public DateTime? FinishedAt { get; set; }
 }

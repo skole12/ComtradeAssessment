@@ -16,7 +16,7 @@ public class PurchaseImportDto
 public class PurchaseImportResponse
 {
     [DataMember(Order = 1)]
-    public bool Success { get; set; }
+    public Guid JobId { get; set; }
 
     [DataMember(Order = 2)]
     public string Message { get; set; }

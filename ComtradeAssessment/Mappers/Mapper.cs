@@ -10,5 +10,7 @@ public class Mapper : Profile
     {
         CreateMap<Campaign, CampaignResponseDto>();
         CreateMap<CampaignResponseDto, Campaign>();
+        CreateMap<CampaignOffer, CampaignOfferResponseDto>();
+        CreateMap<BackgroundJobStatus, CampaignJobResponseDto>();
     }
 }

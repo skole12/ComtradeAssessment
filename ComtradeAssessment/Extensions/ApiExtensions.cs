@@ -25,12 +25,6 @@ public static class ApiExtensions
             SoapSerializer.DataContractSerializer
         );
 
-        endpoints.UseSoapEndpoint<IPurchaseImportService>(
-            "/PurchaseImport.svc",
-            new SoapEncoderOptions(),
-            SoapSerializer.DataContractSerializer
-        );
-
         return endpoints;
     }
 }

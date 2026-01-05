@@ -9,21 +9,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ComtradeAssessment.Services;
 
-public class CampaignOfferService
-    : BaseEntityService<CampaignOffer, CampaignOfferResponseDto>,
+public class CampaignOfferService(
+    IDatabaseContext databaseContext,
+    IMapper mapper,
+    ICurrentUserService currentUserService
+)
+    : BaseEntityService<CampaignOffer, CampaignOfferResponseDto>(databaseContext, mapper),
         ICampaignOfferService
 {
-    private readonly ICurrentUserService currentUserService;
-
-    public CampaignOfferService(
-        IDatabaseContext databaseContext,
-        IMapper mapper,
-        ICurrentUserService currentUserService
-    )
-        : base(databaseContext, mapper)
-    {
-        this.currentUserService = currentUserService;
-    }
+    private readonly ICurrentUserService currentUserService = currentUserService;
 
     [AuthorizeByRole(ERole.SalesAgent)]
     public async Task<CampaignOfferResponseDto> Create(CreateCampaignOfferRequest request)
@@ -52,9 +46,7 @@ public class CampaignOfferService
             .CountAsync();
 
         if (numberOfAgentOffers >= 5)
-        {
             throw new FaultException("It is forbidden to create more than 5 discounts per day!");
-        }
 
         var campaignOffer = new CampaignOffer
         {

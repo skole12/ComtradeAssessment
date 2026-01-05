@@ -14,16 +14,11 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace ComtradeAssessment.Services;
 
-public class UserService : IUserService
+public class UserService(IDatabaseContext databaseContext, IOptions<JwtSettings> jwtOptions)
+    : IUserService
 {
-    private readonly IDatabaseContext databaseContext;
-    private readonly JwtSettings jwtSettings;
-
-    public UserService(IDatabaseContext databaseContext, IOptions<JwtSettings> jwtOptions)
-    {
-        this.databaseContext = databaseContext;
-        jwtSettings = jwtOptions.Value;
-    }
+    private readonly IDatabaseContext databaseContext = databaseContext;
+    private readonly JwtSettings jwtSettings = jwtOptions.Value;
 
     [AllowAnonymous]
     public async Task<string> Login(LoginDto request)
