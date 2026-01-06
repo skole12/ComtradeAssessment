@@ -7,37 +7,31 @@ using ComtradeAssessment.Models;
 namespace ComtradeAssessment.Interfaces;
 
 [ServiceContract(Namespace = "http://tempuri.org/")]
+[AuthorizeServiceByRole(ERole.SalesManager)]
 public interface ICampaignService : IBaseEntityService<Campaign, CampaignResponseDto>
 {
-    [AuthorizeByRole(ERole.SalesManager)]
     [OperationContract]
     Task<CampaignResponseDto> Create(CreateCampaignRequest request);
 
-    [AuthorizeByRole(ERole.SalesManager)]
+    //[AuthorizeByRole(ERole.SalesManager)] besides auth on whole service, we can add authorization individually by method
     [OperationContract]
     Task<CampaignResponseDto> Update(UpdateCampaignRequest request);
 
-    [AuthorizeByRole(ERole.SalesManager)]
     [OperationContract]
     Task Delete(int campaignId);
 
-    [AuthorizeByRole(ERole.SalesManager)]
     [OperationContract]
     Task<CampaignDetailsResponseDto> Details(int campaignId);
 
-    [AuthorizeByRole(ERole.SalesManager)]
     [OperationContract]
     Task<PurchaseImportResponse> ImportPurchases(PurchaseImportDto request);
 
-    [AuthorizeByRole(ERole.SalesManager)]
     [OperationContract]
     Task<CampaignJobResponseDto> JobStatus(Guid jobId);
 
-    [AuthorizeByRole(ERole.SalesManager)]
     [OperationContract]
     Task<DownloadResultsFileResponse> DownloadResultsFile(int campaignId);
 
-    [AuthorizeByRole(ERole.SalesManager)]
     [OperationContract]
     new Task<PagedResult<CampaignResponseDto>> GetAll(BaseRequest request);
 }

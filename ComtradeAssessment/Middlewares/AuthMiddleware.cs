@@ -23,9 +23,10 @@ public sealed class AuthMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly JwtSettings _jwtSettings;
-    private static readonly ConcurrentDictionary<string, AuthRule> AuthRuleCache = new(
-        StringComparer.OrdinalIgnoreCase
-    );
+    private static readonly ConcurrentDictionary<
+        (Type service, string op),
+        AuthRule
+    > AuthRuleCache = new();
 
     private const string WsseNamespace =
         "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
@@ -74,7 +75,14 @@ public sealed class AuthMiddleware
                 return;
             }
 
-            var rule = ResolveAuthRule(operation);
+            var serviceType = ResolveServiceType(context);
+            if (serviceType == null)
+            {
+                await WriteSoapFault(context, "Unknown service");
+                return;
+            }
+
+            var rule = ResolveAuthRule(serviceType, operation);
 
             if (!rule.RequiresAuth)
             {
@@ -112,37 +120,41 @@ public sealed class AuthMiddleware
         }
     }
 
-    private static AuthRule ResolveAuthRule(string operation)
+    private static AuthRule ResolveAuthRule(Type serviceType, string operation)
     {
-        // try to obtain rule from cache, otherwise use reflection
         return AuthRuleCache.GetOrAdd(
-            operation,
-            op =>
+            (serviceType, operation),
+            key =>
             {
-                var method = Assembly
-                    .GetExecutingAssembly()
-                    .GetTypes()
-                    .Where(t => t.GetCustomAttribute<ServiceContractAttribute>() != null)
-                    .SelectMany(t => t.GetMethods())
+                var method = serviceType
+                    .GetMethods()
                     .FirstOrDefault(m =>
                         (m.GetCustomAttribute<OperationContractAttribute>()?.Name ?? m.Name).Equals(
-                            op,
+                            operation,
                             StringComparison.OrdinalIgnoreCase
                         )
                     );
 
-                if (method == null)
-                    return new AuthRule { RequiresAuth = true };
-
-                if (method.GetCustomAttribute<AllowAnonymousAttribute>() != null)
+                // allowanonymous without authorize
+                if (method?.GetCustomAttribute<AllowAnonymousAttribute>() != null)
                     return new AuthRule { RequiresAuth = false };
 
-                var roleAttr = method.GetCustomAttribute<AuthorizeByRoleAttribute>();
-                return new AuthRule
+                //method level authorize
+                var methodAuth = method?.GetCustomAttribute<AuthorizeByRoleAttribute>();
+                if (methodAuth != null)
                 {
-                    RequiresAuth = true,
-                    Roles = roleAttr?.Roles ?? Array.Empty<string>(),
-                };
+                    return new AuthRule { RequiresAuth = true, Roles = methodAuth.Roles };
+                }
+
+                //service level authorize
+                var serviceAuth = serviceType.GetCustomAttribute<AuthorizeServiceByRoleAttribute>();
+                if (serviceAuth != null)
+                {
+                    return new AuthRule { RequiresAuth = true, Roles = serviceAuth.Roles };
+                }
+
+                // 4. Default
+                return new AuthRule { RequiresAuth = true };
             }
         );
     }
@@ -217,5 +229,22 @@ public sealed class AuthMiddleware
 """;
 
         await context.Response.WriteAsync(fault);
+    }
+
+    private static Type? ResolveServiceType(HttpContext context)
+    {
+        var path = context.Request.Path.Value;
+        if (string.IsNullOrWhiteSpace(path))
+            return null;
+
+        var serviceName = Path.GetFileNameWithoutExtension(path);
+
+        return Assembly
+            .GetExecutingAssembly()
+            .GetTypes()
+            .FirstOrDefault(t =>
+                t.GetCustomAttribute<ServiceContractAttribute>() != null
+                && t.Name.Equals($"I{serviceName}Service", StringComparison.OrdinalIgnoreCase)
+            );
     }
 }
