@@ -114,7 +114,7 @@ public sealed class AuthMiddleware
 
     private static AuthRule ResolveAuthRule(string operation)
     {
-        // pokušaj dohvatiti iz cache-a, ako nema, popuni ga pomoću refleksije
+        // try to obtain rule from cache, otherwise use reflection
         return AuthRuleCache.GetOrAdd(
             operation,
             op =>

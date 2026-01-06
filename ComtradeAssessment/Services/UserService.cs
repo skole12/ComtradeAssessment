@@ -38,6 +38,8 @@ public class UserService(IDatabaseContext databaseContext, IOptions<JwtSettings>
         {
             throw new Exception("Invalid credentials");
         }
+
+        //token generation
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(jwtSettings.Key);
 
