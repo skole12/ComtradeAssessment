@@ -1,5 +1,4 @@
 ﻿using System.Runtime.Serialization;
-using ComtradeAssessment.Entities;
 using ComtradeAssessment.Enums;
 
 namespace ComtradeAssessment.Models;
