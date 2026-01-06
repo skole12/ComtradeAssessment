@@ -33,6 +33,8 @@ public class CampaignService(
         if (request.EndDate <= request.StartDate)
             throw new FaultException("EndDate must be greater than StartDate");
 
+        var today = DateTime.Today;
+
         var campaign = new Campaign
         {
             Name = request.Name,
@@ -40,7 +42,7 @@ public class CampaignService(
             EndDate = request.EndDate,
             CreatedAt = DateTime.UtcNow,
             CreatedBy = new Guid(userId),
-            IsActive = true,
+            IsActive = today >= request.StartDate && today <= request.EndDate,
         };
 
         databaseContext.Campaigns.Add(campaign);
