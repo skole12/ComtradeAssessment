@@ -1,7 +1,5 @@
 ﻿using System.ServiceModel;
 using AutoMapper;
-using ComtradeAssessment.Attributes;
-using ComtradeAssessment.Constants;
 using ComtradeAssessment.Entities;
 using ComtradeAssessment.Enums;
 using ComtradeAssessment.Interfaces;
@@ -25,7 +23,6 @@ public class CampaignService(
     /// </summary>
     /// <param name="request">The request containing campaign details.</param>
     /// <returns>The created <see cref="CampaignResponseDto"/> representing the new campaign.</returns>
-    [AuthorizeByRole(ERole.SalesManager)]
     public async Task<CampaignResponseDto> Create(CreateCampaignRequest request)
     {
         var userId = currentUserService.UserId;
@@ -56,7 +53,6 @@ public class CampaignService(
     /// </summary>
     /// <param name="campaignId">The ID of the campaign to retrieve.</param>
     /// <returns>The <see cref="CampaignDetailsResponseDto"/> containing the campaign details.</returns>
-    [AuthorizeByRole(ERole.SalesManager)]
     public async Task<CampaignDetailsResponseDto> Details(int campaignId)
     {
         var result = await databaseContext
@@ -88,7 +84,6 @@ public class CampaignService(
     /// <summary>
     /// Deletes a campaign identified by the given campaign ID.
     /// </summary>
-    [AuthorizeByRole(ERole.SalesManager)]
     public async Task Delete(int campaignId)
     {
         var campaign = await databaseContext.Campaigns.FindAsync(campaignId);
@@ -107,7 +102,6 @@ public class CampaignService(
     /// <summary>
     /// Updates an existing campaign with the provided details.
     /// </summary>
-    [AuthorizeByRole(ERole.SalesManager)]
     public async Task<CampaignResponseDto> Update(UpdateCampaignRequest request)
     {
         var campaign = await databaseContext.Campaigns.FindAsync(request.Id);
@@ -135,7 +129,6 @@ public class CampaignService(
     /// <summary>
     /// Imports purchases for a campaign based on the provided import data.
     /// </summary>
-    [AuthorizeByRole(ERole.SalesManager)]
     public async Task<PurchaseImportResponse> ImportPurchases(PurchaseImportDto request)
     {
         try
@@ -185,7 +178,6 @@ public class CampaignService(
     /// <summary>
     /// Retrieves the status of a Hangfire job by its ID.
     /// </summary>
-    [AuthorizeByRole(ERole.SalesManager)]
     public async Task<CampaignJobResponseDto> JobStatus(Guid jobId)
     {
         var job = await databaseContext.BackgroundJobStatuses.FindAsync(jobId);
@@ -197,7 +189,6 @@ public class CampaignService(
     /// <summary>
     /// Downloads the file associated with the imported results for the specified campaign.
     /// </summary>
-    [AuthorizeByRole(ERole.SalesManager)]
     public async Task<DownloadResultsFileResponse> DownloadResultsFile(int campaignId)
     {
         var campaign =
@@ -220,11 +211,5 @@ public class CampaignService(
             ContentType = "application/octet-stream",
             FileContentBase64 = Convert.ToBase64String(fileBytes),
         };
-    }
-
-    [AuthorizeByRole(ERole.SalesManager)]
-    public override Task<PagedResult<CampaignResponseDto>> GetAll(BaseRequest request)
-    {
-        return base.GetAll(request);
     }
 }

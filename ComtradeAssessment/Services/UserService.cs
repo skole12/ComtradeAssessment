@@ -2,8 +2,6 @@
 using System.Security.Claims;
 using System.ServiceModel;
 using System.Text;
-using ComtradeAssessment.Attributes;
-using ComtradeAssessment.Constants;
 using ComtradeAssessment.Entities;
 using ComtradeAssessment.Extensions;
 using ComtradeAssessment.Interfaces;
@@ -25,7 +23,6 @@ public class UserService(IDatabaseContext databaseContext, IOptions<JwtSettings>
     /// </summary>
     /// <param name="request">The login request containing user credentials.</param>
     /// <returns>A string representing the authentication token or session ID.</returns>
-    [AllowAnonymous]
     public async Task<string> Login(LoginDto request)
     {
         var user = await databaseContext
@@ -71,7 +68,6 @@ public class UserService(IDatabaseContext databaseContext, IOptions<JwtSettings>
     /// </summary>
     /// <param name="request">The registration details of the new user.</param>
     /// <returns>The created <see cref="UserDto"/> representing the new user.</returns>
-    [AuthorizeByRole(ERole.SuperAdmin)]
     public async Task<UserDto> RegisterUser(RegisterDto request)
     {
         bool existingUser = await databaseContext
@@ -110,7 +106,6 @@ public class UserService(IDatabaseContext databaseContext, IOptions<JwtSettings>
     /// Activates or deactivates a user based on the provided request.
     /// </summary>
     /// <param name="request">The request containing the user ID and desired active state.</param>
-    [AuthorizeByRole(ERole.SuperAdmin)]
     public async Task ActivateUser(ActivateUserRequest request)
     {
         var updatedRows = await databaseContext

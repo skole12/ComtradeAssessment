@@ -1,7 +1,5 @@
 ﻿using System.ServiceModel;
 using AutoMapper;
-using ComtradeAssessment.Attributes;
-using ComtradeAssessment.Constants;
 using ComtradeAssessment.Entities;
 using ComtradeAssessment.Interfaces;
 using ComtradeAssessment.Models;
@@ -24,7 +22,6 @@ public class CampaignOfferService(
     /// </summary>
     /// <param name="request">The request containing campaign offer details.</param>
     /// <returns>The created <see cref="CampaignOfferResponseDto"/>.</returns>
-    [AuthorizeByRole(ERole.SalesAgent)]
     public async Task<CampaignOfferResponseDto> Create(CampaignOfferRequest request)
     {
         var currentDate = DateTime.UtcNow.Date;
@@ -79,7 +76,6 @@ public class CampaignOfferService(
     /// Deletes a campaign offer based on the provided request.
     /// </summary>
     /// <param name="request">The request containing the ID of the campaign offer to delete.</param>
-    [AuthorizeByRole(ERole.SalesAgent)]
     public async Task Delete(CampaignOfferRequest request)
     {
         var campaign = await databaseContext.Campaigns.FindAsync(request.CampaignId);
@@ -97,11 +93,5 @@ public class CampaignOfferService(
 
         if (deletedRows == 0)
             throw new FaultException("Campaign offer not found");
-    }
-
-    [AuthorizeByRole(ERole.SalesAgent)]
-    public override Task<PagedResult<CampaignOfferResponseDto>> GetAll(BaseRequest request)
-    {
-        return base.GetAll(request);
     }
 }
