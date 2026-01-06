@@ -33,7 +33,6 @@ public class PurchaseImportWorker(
         try
         {
             using var scope = serviceScopeFactory.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
 
             var seen = new HashSet<int>();
             var duplicates = new HashSet<int>();
@@ -95,7 +94,7 @@ public class PurchaseImportWorker(
 
                 if (batch.Count >= batchSize)
                 {
-                    await UpdateCampaignOffersBatch(context, campaignId, batch);
+                    await UpdateCampaignOffersBatch(databaseContext, campaignId, batch);
                     batch.Clear();
                 }
             }
@@ -114,7 +113,7 @@ public class PurchaseImportWorker(
             }
 
             if (batch.Count != 0)
-                await UpdateCampaignOffersBatch(context, campaignId, batch);
+                await UpdateCampaignOffersBatch(databaseContext, campaignId, batch);
 
             var timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
             var fileName = $"campaignResults_{campaignId}_{timestamp}.csv";
@@ -124,12 +123,24 @@ public class PurchaseImportWorker(
 
             File.Copy(path, resultPath, overwrite: true);
 
-            await context
-                .Campaigns.Where(c => c.Id == campaignId)
-                .ExecuteUpdateAsync(c =>
-                    c.SetProperty(c => c.ResultsConcluded, true)
-                        .SetProperty(c => c.CsvResultsPath, resultPath)
-                );
+            var campaign = await databaseContext.Campaigns.FindAsync(campaignId);
+
+            if (campaign == null)
+            {
+                throw new InvalidOperationException("Campaign not found");
+            }
+
+            //setting campaign results directly in database, not in memory
+            campaign.ResultsConcluded = true;
+            campaign.CsvResultsPath = resultPath;
+
+            campaign.DiscountsOffered = await databaseContext.CampaignOffers.CountAsync(co =>
+                co.CampaignId == campaignId
+            );
+
+            campaign.PurchasesMade = await databaseContext.CampaignOffers.CountAsync(co =>
+                co.CampaignId == campaignId && co.MadePurchase
+            );
 
             job.State = JobState.Succeeded;
         }
@@ -151,14 +162,14 @@ public class PurchaseImportWorker(
     }
 
     private async Task UpdateCampaignOffersBatch(
-        DatabaseContext context,
+        IDatabaseContext databaseContext,
         int campaignId,
         List<(int CustomerId, DateTime PurchaseDate, string? Note)> batch
     )
     {
         var customerIds = batch.Select(x => x.CustomerId).ToList();
 
-        var offers = await context
+        var offers = await databaseContext
             .CampaignOffers.Where(o =>
                 o.CampaignId == campaignId && customerIds.Contains(o.CustomerId)
             )
@@ -177,7 +188,9 @@ public class PurchaseImportWorker(
             offer.Note = info.Note;
         }
 
-        await context.BulkUpdateAsync(
+        var dbContext = (DbContext)databaseContext;
+
+        await dbContext.BulkUpdateAsync(
             offers,
             new BulkConfig
             {

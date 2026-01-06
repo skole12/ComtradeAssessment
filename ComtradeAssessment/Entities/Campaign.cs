@@ -34,6 +34,12 @@ public class Campaign
     [Required]
     public Guid CreatedBy { get; set; }
 
+    [Required]
+    public int DiscountsOffered { get; set; }
+
+    [Required]
+    public int PurchasesMade { get; set; }
+
     [ForeignKey(nameof(CreatedBy))]
     public virtual User CreatedByUser { get; set; }
 

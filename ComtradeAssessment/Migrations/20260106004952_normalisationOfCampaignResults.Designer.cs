@@ -4,6 +4,7 @@ using ComtradeAssessment.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ComtradeAssessment.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20260106004952_normalisationOfCampaignResults")]
+    partial class normalisationOfCampaignResults
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -71,7 +74,7 @@ namespace ComtradeAssessment.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<int>("DiscountsOffered")
+                    b.Property<int?>("DiscountsOffered")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("EndDate")
@@ -87,7 +90,7 @@ namespace ComtradeAssessment.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<int>("PurchasesMade")
+                    b.Property<int?>("PurchasesMade")
                         .HasColumnType("int");
 
                     b.Property<bool>("ResultsConcluded")

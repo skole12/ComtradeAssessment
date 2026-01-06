@@ -40,6 +40,8 @@ public class CampaignService(
             CreatedAt = DateTime.UtcNow,
             CreatedBy = new Guid(userId),
             IsActive = today >= request.StartDate && today <= request.EndDate,
+            DiscountsOffered = 0,
+            PurchasesMade = 0,
         };
 
         databaseContext.Campaigns.Add(campaign);
@@ -67,14 +69,10 @@ public class CampaignService(
                 CreatedBy = c.CreatedBy,
                 ResultsConcluded = c.ResultsConcluded,
                 IsActive = c.IsActive,
-                DiscountsOffered = c.CampaignOffers.Count(),
-                PurchasesMade = c.CampaignOffers.Count(co => co.MadePurchase),
+                DiscountsOffered = c.DiscountsOffered,
+                PurchasesMade = c.PurchasesMade,
                 SuccessRate =
-                    c.CampaignOffers.Count() > 0
-                        ? (float)c.CampaignOffers.Count(co => co.MadePurchase)
-                            / c.CampaignOffers.Count()
-                            * 100
-                        : 0,
+                    c.DiscountsOffered > 0 ? (float)c.PurchasesMade / c.DiscountsOffered * 100 : 0,
             })
             .FirstOrDefaultAsync();
 
