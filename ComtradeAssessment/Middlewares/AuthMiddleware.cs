@@ -1,4 +1,5 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System.Collections.Concurrent;
+using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using System.Security.Claims;
 using System.ServiceModel;
@@ -22,6 +23,9 @@ public sealed class AuthMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly JwtSettings _jwtSettings;
+    private static readonly ConcurrentDictionary<string, AuthRule> AuthRuleCache = new(
+        StringComparer.OrdinalIgnoreCase
+    );
 
     private const string WsseNamespace =
         "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
@@ -97,32 +101,37 @@ public sealed class AuthMiddleware
 
     private static AuthRule ResolveAuthRule(string operation)
     {
-        var method = Assembly
-            .GetExecutingAssembly()
-            .GetTypes()
-            .Where(t => t.GetCustomAttribute<ServiceContractAttribute>() != null)
-            .SelectMany(t => t.GetMethods())
-            .FirstOrDefault(m =>
-                (m.GetCustomAttribute<OperationContractAttribute>()?.Name ?? m.Name).Equals(
-                    operation,
-                    StringComparison.OrdinalIgnoreCase
-                )
-            );
+        // pokušaj dohvatiti iz cache-a, ako nema, popuni ga pomoću refleksije
+        return AuthRuleCache.GetOrAdd(
+            operation,
+            op =>
+            {
+                var method = Assembly
+                    .GetExecutingAssembly()
+                    .GetTypes()
+                    .Where(t => t.GetCustomAttribute<ServiceContractAttribute>() != null)
+                    .SelectMany(t => t.GetMethods())
+                    .FirstOrDefault(m =>
+                        (m.GetCustomAttribute<OperationContractAttribute>()?.Name ?? m.Name).Equals(
+                            op,
+                            StringComparison.OrdinalIgnoreCase
+                        )
+                    );
 
-        // if method does not have authorization annotation, it is secured by default
-        if (method == null)
-        {
-            return new AuthRule { RequiresAuth = true };
-        }
+                if (method == null)
+                    return new AuthRule { RequiresAuth = true };
 
-        if (method.GetCustomAttribute<AllowAnonymousAttribute>() != null)
-        {
-            return new AuthRule { RequiresAuth = false };
-        }
+                if (method.GetCustomAttribute<AllowAnonymousAttribute>() != null)
+                    return new AuthRule { RequiresAuth = false };
 
-        var roleAttr = method.GetCustomAttribute<AuthorizeByRoleAttribute>();
-
-        return new AuthRule { RequiresAuth = true, Roles = roleAttr?.Roles ?? [] };
+                var roleAttr = method.GetCustomAttribute<AuthorizeByRoleAttribute>();
+                return new AuthRule
+                {
+                    RequiresAuth = true,
+                    Roles = roleAttr?.Roles ?? Array.Empty<string>(),
+                };
+            }
+        );
     }
 
     private ClaimsPrincipal ValidateBearerToken(XDocument doc, HttpContext context)
