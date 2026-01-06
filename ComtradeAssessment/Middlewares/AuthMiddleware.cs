@@ -47,6 +47,19 @@ public sealed class AuthMiddleware
             return;
         }
 
+        //not blocking ?wsdl requests
+        if (
+            context.Request.QueryString.HasValue
+            && context.Request.QueryString.Value.Contains(
+                "wsdl",
+                StringComparison.OrdinalIgnoreCase
+            )
+        )
+        {
+            await _next(context);
+            return;
+        }
+
         context.Request.EnableBuffering();
         var body = await ReadRequestBodyAsync(context.Request);
 
