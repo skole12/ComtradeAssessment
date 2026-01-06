@@ -1,35 +1,19 @@
-﻿using System.Collections.Concurrent;
-using System.IdentityModel.Tokens.Jwt;
-using System.Reflection;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.ServiceModel;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
-using ComtradeAssessment.Attributes;
+using ComtradeAssessment.Cache;
 using ComtradeAssessment.Extensions;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace ComtradeAssessment.Middlewares;
 
-sealed class AuthRule
-{
-    public bool RequiresAuth { get; init; }
-    public string[] Roles { get; init; } = [];
-}
-
 public sealed class AuthMiddleware(RequestDelegate next, IOptions<JwtSettings> options)
 {
     private readonly RequestDelegate _next = next;
     private readonly JwtSettings _jwtSettings = options.Value;
-    private static readonly ConcurrentDictionary<
-        (Type service, string op),
-        AuthRule
-    > AuthRuleCache = new();
-    private static readonly ConcurrentDictionary<string, Type?> ServiceTypeCache = new(
-        StringComparer.OrdinalIgnoreCase
-    );
 
     private const string WsseNamespace =
         "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
@@ -90,7 +74,6 @@ public sealed class AuthMiddleware(RequestDelegate next, IOptions<JwtSettings> o
             var principal = ValidateBearerToken(doc, context);
             context.User = principal;
 
-            // ROLE CHECK
             if (rule.Roles.Length > 0)
             {
                 var userRoles = principal.FindAll(ClaimTypes.Role).Select(r => r.Value);
@@ -119,41 +102,13 @@ public sealed class AuthMiddleware(RequestDelegate next, IOptions<JwtSettings> o
 
     private static AuthRule ResolveAuthRule(Type serviceType, string operation)
     {
-        return AuthRuleCache.GetOrAdd(
-            (serviceType, operation),
-            key =>
-            {
-                var method = serviceType
-                    .GetMethods()
-                    .FirstOrDefault(m =>
-                        (m.GetCustomAttribute<OperationContractAttribute>()?.Name ?? m.Name).Equals(
-                            operation,
-                            StringComparison.OrdinalIgnoreCase
-                        )
-                    );
+        if (!AuthCache.ServiceAuthCache.TryGetValue(serviceType.Name, out var entry))
+            return new AuthRule { RequiresAuth = true };
 
-                // allowanonymous without authorize
-                if (method?.GetCustomAttribute<AllowAnonymousAttribute>() != null)
-                    return new AuthRule { RequiresAuth = false };
+        if (entry.OperationRules.TryGetValue(operation, out var rule))
+            return rule;
 
-                //method level authorize
-                var methodAuth = method?.GetCustomAttribute<AuthorizeByRoleAttribute>();
-                if (methodAuth != null)
-                {
-                    return new AuthRule { RequiresAuth = true, Roles = methodAuth.Roles };
-                }
-
-                //service level authorize
-                var serviceAuth = serviceType.GetCustomAttribute<AuthorizeServiceByRoleAttribute>();
-                if (serviceAuth != null)
-                {
-                    return new AuthRule { RequiresAuth = true, Roles = serviceAuth.Roles };
-                }
-
-                // 4. Default
-                return new AuthRule { RequiresAuth = true };
-            }
-        );
+        return new AuthRule { RequiresAuth = true };
     }
 
     private static Type? ResolveServiceType(HttpContext context)
@@ -164,22 +119,14 @@ public sealed class AuthMiddleware(RequestDelegate next, IOptions<JwtSettings> o
 
         var serviceName = Path.GetFileNameWithoutExtension(path);
 
-        return ServiceTypeCache.GetOrAdd(
-            serviceName,
-            nameof =>
-            {
-                return Assembly
-                    .GetExecutingAssembly()
-                    .GetTypes()
-                    .FirstOrDefault(t =>
-                        t.GetCustomAttribute<ServiceContractAttribute>() != null
-                        && t.Name.Equals(
-                            $"I{serviceName}Service",
-                            StringComparison.OrdinalIgnoreCase
-                        )
-                    );
-            }
-        );
+        var fullServiceName = $"I{serviceName}Service";
+
+        if (AuthCache.ServiceAuthCache.TryGetValue(fullServiceName, out var entry))
+        {
+            return entry.ServiceType;
+        }
+
+        return null;
     }
 
     private ClaimsPrincipal ValidateBearerToken(XDocument doc, HttpContext context)

@@ -1,3 +1,4 @@
+using ComtradeAssessment.Cache;
 using ComtradeAssessment.Extensions;
 using ComtradeAssessment.Middlewares;
 using ComtradeAssessment.Seeding;
@@ -6,6 +7,7 @@ using Hangfire;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApplicationServices(builder.Configuration);
+AuthCacheInitializer.BuildAuthCache();
 
 // Add services to the container.
 
