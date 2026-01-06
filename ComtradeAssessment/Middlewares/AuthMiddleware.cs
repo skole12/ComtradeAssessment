@@ -16,26 +16,23 @@ namespace ComtradeAssessment.Middlewares;
 sealed class AuthRule
 {
     public bool RequiresAuth { get; init; }
-    public string[] Roles { get; init; } = Array.Empty<string>();
+    public string[] Roles { get; init; } = [];
 }
 
-public sealed class AuthMiddleware
+public sealed class AuthMiddleware(RequestDelegate next, IOptions<JwtSettings> options)
 {
-    private readonly RequestDelegate _next;
-    private readonly JwtSettings _jwtSettings;
+    private readonly RequestDelegate _next = next;
+    private readonly JwtSettings _jwtSettings = options.Value;
     private static readonly ConcurrentDictionary<
         (Type service, string op),
         AuthRule
     > AuthRuleCache = new();
+    private static readonly ConcurrentDictionary<string, Type?> ServiceTypeCache = new(
+        StringComparer.OrdinalIgnoreCase
+    );
 
     private const string WsseNamespace =
         "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
-
-    public AuthMiddleware(RequestDelegate next, IOptions<JwtSettings> options)
-    {
-        _next = next;
-        _jwtSettings = options.Value;
-    }
 
     public async Task InvokeAsync(HttpContext context)
     {
@@ -159,6 +156,32 @@ public sealed class AuthMiddleware
         );
     }
 
+    private static Type? ResolveServiceType(HttpContext context)
+    {
+        var path = context.Request.Path.Value;
+        if (string.IsNullOrWhiteSpace(path))
+            return null;
+
+        var serviceName = Path.GetFileNameWithoutExtension(path);
+
+        return ServiceTypeCache.GetOrAdd(
+            serviceName,
+            nameof =>
+            {
+                return Assembly
+                    .GetExecutingAssembly()
+                    .GetTypes()
+                    .FirstOrDefault(t =>
+                        t.GetCustomAttribute<ServiceContractAttribute>() != null
+                        && t.Name.Equals(
+                            $"I{serviceName}Service",
+                            StringComparison.OrdinalIgnoreCase
+                        )
+                    );
+            }
+        );
+    }
+
     private ClaimsPrincipal ValidateBearerToken(XDocument doc, HttpContext context)
     {
         XNamespace wsse = WsseNamespace;
@@ -229,22 +252,5 @@ public sealed class AuthMiddleware
 """;
 
         await context.Response.WriteAsync(fault);
-    }
-
-    private static Type? ResolveServiceType(HttpContext context)
-    {
-        var path = context.Request.Path.Value;
-        if (string.IsNullOrWhiteSpace(path))
-            return null;
-
-        var serviceName = Path.GetFileNameWithoutExtension(path);
-
-        return Assembly
-            .GetExecutingAssembly()
-            .GetTypes()
-            .FirstOrDefault(t =>
-                t.GetCustomAttribute<ServiceContractAttribute>() != null
-                && t.Name.Equals($"I{serviceName}Service", StringComparison.OrdinalIgnoreCase)
-            );
     }
 }
