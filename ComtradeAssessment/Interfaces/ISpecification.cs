@@ -14,9 +14,3 @@ public interface ISpecification<T>
     int Skip { get; }
     bool IsPaginationEnabled { get; }
 }
-
-//TODO delete this
-public interface ISpecification<T, TResult> : ISpecification<T>
-{
-    Expression<Func<T, TResult>>? Select { get; }
-}

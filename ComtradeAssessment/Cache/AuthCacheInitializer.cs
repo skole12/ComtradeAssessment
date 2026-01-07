@@ -6,6 +6,7 @@ namespace ComtradeAssessment.Cache;
 
 public static class AuthCacheInitializer
 {
+    //putting service/methods auth annotations in cache at startup so we avoid reflection every request
     public static void BuildAuthCache()
     {
         var allServices = Assembly
